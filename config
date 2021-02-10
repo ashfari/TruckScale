@@ -1,0 +1,1 @@
+{"refreshRate":"3","apiQrCode":"http://localhost:8000/api/v1/qrcode","minWeight":"50","apiTimbangan":"http://localhost:8000/api/weigh-bridge/scans","title":"Truck Scale","kodeTimbangan":"1"}
