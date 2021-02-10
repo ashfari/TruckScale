@@ -19,6 +19,8 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.text.DefaultCaret;
+import static javax.swing.text.DefaultCaret.ALWAYS_UPDATE;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -51,6 +53,9 @@ public class FrmMain extends javax.swing.JFrame {
         communicator = new Communicator(this);
         communicator.searchForPorts();
         config = configManager.getConfig();
+        
+//        DefaultCaret caret = (DefaultCaret) txtLog.getCaret();
+//        caret.setUpdatePolicy(ALWAYS_UPDATE);
 
         implementConfig();
         refreshPerSecond();
@@ -263,8 +268,8 @@ public class FrmMain extends javax.swing.JFrame {
                         .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, 23, Short.MAX_VALUE))
                     .addComponent(refreshPort, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1)
-                .addContainerGap())
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 78, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         jPanel3.setBackground(new java.awt.Color(255, 255, 255));
