@@ -34,7 +34,13 @@ public class FrmJSerial extends javax.swing.JFrame {
         this.setLocationRelativeTo(null);
         jSerialManager = new JSerialManager();
         
-        refreshPerSecond();
+        try {
+            dataListener();
+        } catch (Exception e) {
+            System.out.println("No connection");
+        }
+        
+//        refreshPerSecond();
     }
     
     private void dataListener() {
@@ -61,6 +67,8 @@ public class FrmJSerial extends javax.swing.JFrame {
                         System.out.println("value : " + messages[0]);
                         System.out.println("unit : " + messages[1]);
                         serialMessage.append(message);
+                        serialMessage.append("value : " + messages[0]);
+                        serialMessage.append("unit : " + messages[1]);
                     } else {
                         message += (char) newData[i];
                     }
