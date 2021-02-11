@@ -7,7 +7,7 @@ package view;
 
 import controller.ApiManager;
 import controller.ConfigManager;
-import controller.Communicator;
+//import controller.Communicator;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -31,7 +31,7 @@ public class FrmMain extends javax.swing.JFrame {
     ConfigManager configManager = new ConfigManager();
     ApiManager apiManager = new ApiManager();
     //Communicator object
-    Communicator communicator = null;
+//    Communicator communicator = null;
     Map params = new LinkedHashMap<>();
     Map prevParams = new LinkedHashMap<>();
     JSONObject config = new JSONObject();
@@ -48,12 +48,9 @@ public class FrmMain extends javax.swing.JFrame {
         initComponents();
         this.setLocationRelativeTo(null);
 
-        communicator = new Communicator(this);
-        communicator.searchForPorts();
+//        communicator = new Communicator(this);
+//        communicator.searchForPorts();
         config = configManager.getConfig();
-        
-//        DefaultCaret caret = (DefaultCaret) txtLog.getCaret();
-//        caret.setUpdatePolicy(ALWAYS_UPDATE);
 
         implementConfig();
         refreshPerSecond();
@@ -75,7 +72,7 @@ public class FrmMain extends javax.swing.JFrame {
                 date = new Date();
                 date_time_counter.setText(formatter.format(date));
                 
-                connectSerialPort();
+//                connectSerialPort();
                 
 //                Set UI based Config
                 try {
@@ -116,16 +113,16 @@ public class FrmMain extends javax.swing.JFrame {
         timer.scheduleAtFixedRate(task, 1000, 1000);
     }
     
-    private void connectSerialPort() {
-        communicator.connect();
-        if (communicator.getConnected() == true)
-        {
-            if (communicator.initIOStream() == true)
-            {
-                communicator.initListener();
-            }
-        }
-    }
+//    private void connectSerialPort() {
+//        communicator.connect();
+//        if (communicator.getConnected() == true)
+//        {
+//            if (communicator.initIOStream() == true)
+//            {
+//                communicator.initListener();
+//            }
+//        }
+//    }
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -392,7 +389,7 @@ public class FrmMain extends javax.swing.JFrame {
 
     private void refreshPortActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_refreshPortActionPerformed
         // TODO add your handling code here:
-        communicator.searchForPorts();
+//        communicator.searchForPorts();
     }//GEN-LAST:event_refreshPortActionPerformed
 
     /**
