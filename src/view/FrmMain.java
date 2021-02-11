@@ -30,8 +30,6 @@ public class FrmMain extends javax.swing.JFrame {
 
     ConfigManager configManager = new ConfigManager();
     ApiManager apiManager = new ApiManager();
-    //Communicator object
-//    Communicator communicator = null;
     Map params = new LinkedHashMap<>();
     Map prevParams = new LinkedHashMap<>();
     JSONObject config = new JSONObject();
@@ -48,8 +46,6 @@ public class FrmMain extends javax.swing.JFrame {
         initComponents();
         this.setLocationRelativeTo(null);
 
-//        communicator = new Communicator(this);
-//        communicator.searchForPorts();
         config = configManager.getConfig();
 
         implementConfig();
@@ -71,8 +67,6 @@ public class FrmMain extends javax.swing.JFrame {
 //                Show Date
                 date = new Date();
                 date_time_counter.setText(formatter.format(date));
-                
-//                connectSerialPort();
                 
 //                Set UI based Config
                 try {
@@ -112,18 +106,7 @@ public class FrmMain extends javax.swing.JFrame {
         };
         timer.scheduleAtFixedRate(task, 1000, 1000);
     }
-    
-//    private void connectSerialPort() {
-//        communicator.connect();
-//        if (communicator.getConnected() == true)
-//        {
-//            if (communicator.initIOStream() == true)
-//            {
-//                communicator.initListener();
-//            }
-//        }
-//    }
-
+ 
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always

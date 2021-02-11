@@ -18,6 +18,7 @@ import java.util.TimerTask;
 public class FrmJSerial extends javax.swing.JFrame {
     
     JSerialController jSerialController = null;
+    String message = "";
 
     /**
      * Creates new form FrmJSerial
@@ -47,10 +48,20 @@ public class FrmJSerial extends javax.swing.JFrame {
             @Override
             public void serialEvent(SerialPortEvent event) {
                 byte[] newData = event.getReceivedData();
-                System.out.println("Received data of size: " + newData.length);
+
                 for (int i = 0; i < newData.length; ++i) {
-                    System.out.print((char) newData[i]);
-                    serialMessage.append("" + (char) newData[i]);
+                    if (newData[i] == 2) {
+                        message = "";
+                    } else if (newData[i] == 3) {
+                        String messages[] = message.trim().split("\\s");
+                        System.out.println("length" + messages.length);
+                        System.out.println(message);
+                        System.out.println("value : " + messages[0]);
+                        System.out.println("unit : " + messages[1]);
+                        serialMessage.append(message);
+                    } else {
+                        message += String.valueOf((char) newData[i]);
+                    }
                 }
                 serialMessage.append("\n");
 //                System.out.println("\n");
