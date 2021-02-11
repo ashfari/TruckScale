@@ -8,6 +8,9 @@ package controller;
 import com.fazecast.jSerialComm.SerialPort;
 import com.fazecast.jSerialComm.SerialPortDataListener;
 import com.fazecast.jSerialComm.SerialPortEvent;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
@@ -16,10 +19,11 @@ import org.json.JSONObject;
  */
 public class JSerialManager {
     
-    String message = null;
+    String message = "";
+    JSONObject weight = null;
     
     public JSONObject getWeight() {
-        JSONObject weight = new JSONObject();
+        weight = new JSONObject();
         
         SerialPort comPort = SerialPort.getCommPorts()[0];
         comPort.openPort();
@@ -41,10 +45,15 @@ public class JSerialManager {
                         System.out.println("length" + messages.length);
                         System.out.println(message);
                         
-                        System.out.println("value : " + messages[0]);
-                        System.out.println("unit : " + messages[1]);
+                        try {
+                            weight.put("value", messages[0]);
+                            weight.put("unit", messages[1]);
+                        } catch (JSONException ex) {
+                            Logger.getLogger(JSerialManager.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+                        comPort.closePort();
                     } else {
-                        message += String.valueOf((char) newData[i]);
+                        message += (char) newData[i];
                     }
                 }
             }

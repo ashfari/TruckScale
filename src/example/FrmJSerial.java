@@ -8,8 +8,13 @@ package example;
 import com.fazecast.jSerialComm.SerialPort;
 import com.fazecast.jSerialComm.SerialPortDataListener;
 import com.fazecast.jSerialComm.SerialPortEvent;
+import controller.JSerialManager;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  *
@@ -17,7 +22,8 @@ import java.util.TimerTask;
  */
 public class FrmJSerial extends javax.swing.JFrame {
     
-    JSerialController jSerialController = null;
+    JSerialManager jSerialManager = null;
+    JSONObject weight = null;
     String message = "";
 
     /**
@@ -26,13 +32,9 @@ public class FrmJSerial extends javax.swing.JFrame {
     public FrmJSerial() {
         initComponents();
         this.setLocationRelativeTo(null);
-        jSerialController = new JSerialController();
+        jSerialManager = new JSerialManager();
         
-        try {
-            dataListener();
-        } catch (Exception e) {
-            serialPort.setText("No comm port found!");
-        }
+        refreshPerSecond();
     }
     
     private void dataListener() {
@@ -60,7 +62,7 @@ public class FrmJSerial extends javax.swing.JFrame {
                         System.out.println("unit : " + messages[1]);
                         serialMessage.append(message);
                     } else {
-                        message += String.valueOf((char) newData[i]);
+                        message += (char) newData[i];
                     }
                 }
                 serialMessage.append("\n");
@@ -75,7 +77,14 @@ public class FrmJSerial extends javax.swing.JFrame {
         TimerTask task = new TimerTask() {
             @Override
             public void run() {
-                
+                weight = new JSONObject();
+                weight = jSerialManager.getWeight();
+                try {
+                    serialMessage.append("value => " + weight.get("value"));
+                    serialMessage.append("unit => " + weight.get("unit"));
+                } catch (JSONException ex) {
+                    Logger.getLogger(FrmJSerial.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
         };
         timer.scheduleAtFixedRate(task, 1000, 1000);
