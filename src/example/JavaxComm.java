@@ -20,7 +20,6 @@ public class JavaxComm implements Runnable, SerialPortEventListener {
     Thread readThread;
 
     public static void main(String[] args) {
-
         portList = CommPortIdentifier.getPortIdentifiers();
 
         while (portList.hasMoreElements()) {
@@ -37,22 +36,26 @@ public class JavaxComm implements Runnable, SerialPortEventListener {
     public JavaxComm() {
         try {
             serialPort = (SerialPort) portId.open("SimpleReadApp", 2000);
-        } catch (PortInUseException e) {}
+        } catch (PortInUseException e) {
+        }
         try {
             inputStream = serialPort.getInputStream();
-        } catch (IOException e) {}
-    try {
+        } catch (IOException e) {
+        }
+        try {
             serialPort.addEventListener(this);
-    } catch (TooManyListenersException e) {}
+        } catch (TooManyListenersException e) {
+        }
 
         serialPort.notifyOnDataAvailable(true);
 
         try {
             serialPort.setSerialPortParams(9600,
-                SerialPort.DATABITS_8,
-                SerialPort.STOPBITS_1,
-                SerialPort.PARITY_NONE);
-        } catch (UnsupportedCommOperationException e) {}
+                    SerialPort.DATABITS_8,
+                    SerialPort.STOPBITS_1,
+                    SerialPort.PARITY_NONE);
+        } catch (UnsupportedCommOperationException e) {
+        }
 
         readThread = new Thread(this);
         readThread.start();
@@ -61,34 +64,36 @@ public class JavaxComm implements Runnable, SerialPortEventListener {
     public void run() {
         try {
             Thread.sleep(20000);
-        } catch (InterruptedException e) {}
+        } catch (InterruptedException e) {
+        }
     }
 
 //Serial event
     public void serialEvent(SerialPortEvent event) {
 
-        switch(event.getEventType()) {
-        case SerialPortEvent.BI:
-        case SerialPortEvent.OE:
-        case SerialPortEvent.FE:
-        case SerialPortEvent.PE:
-        case SerialPortEvent.CD:
-        case SerialPortEvent.CTS:
-        case SerialPortEvent.DSR:
-        case SerialPortEvent.RI:
-        case SerialPortEvent.OUTPUT_BUFFER_EMPTY:
-            break;
+        switch (event.getEventType()) {
+            case SerialPortEvent.BI:
+            case SerialPortEvent.OE:
+            case SerialPortEvent.FE:
+            case SerialPortEvent.PE:
+            case SerialPortEvent.CD:
+            case SerialPortEvent.CTS:
+            case SerialPortEvent.DSR:
+            case SerialPortEvent.RI:
+            case SerialPortEvent.OUTPUT_BUFFER_EMPTY:
+                break;
 
-        case SerialPortEvent.DATA_AVAILABLE:
-            byte[] readBuffer = new byte[20];
+            case SerialPortEvent.DATA_AVAILABLE:
+                byte[] readBuffer = new byte[20];
 
-            try {
-                while (inputStream.available() > 0) {
-                    int numBytes = inputStream.read(readBuffer);
+                try {
+                    while (inputStream.available() > 0) {
+                        int numBytes = inputStream.read(readBuffer);
+                    }
+                    System.out.print(new String(readBuffer));
+                } catch (IOException e) {
                 }
-                System.out.print(new String(readBuffer));
-            } catch (IOException e) {}
-            break;
+                break;
         }
     }
 }
