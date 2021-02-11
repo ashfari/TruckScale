@@ -19,8 +19,6 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.text.DefaultCaret;
-import static javax.swing.text.DefaultCaret.ALWAYS_UPDATE;
 import org.json.JSONException;
 import org.json.JSONObject;
 
