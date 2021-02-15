@@ -68,6 +68,7 @@ public class FrmMain extends javax.swing.JFrame {
         dotLabel.setEnabled(false);
         main_title.setText(config.getString("title"));
         refreshRateLabel.setText(config.get("refreshRate") + "s");
+        averyWeighTronix.getWeight();
     }
 
     private void refreshPerSecond() {
@@ -100,6 +101,8 @@ public class FrmMain extends javax.swing.JFrame {
                         if ((Double.parseDouble(currentWeight.get("value").toString())
                                 - Double.parseDouble(weightValue.getText().toString())) 
                                 > Double.parseDouble(config.get("minStepWeight").toString())) {
+                            weightValue.setText(currentWeight.get("value").toString());
+                            weightUnit.setText(currentWeight.get("unit").toString());
                             params.put("weigh_bridge_id", config.get("kodeTimbangan"));
                             params.put("value_in_kg", Double.parseDouble(weightValue.getText()));
                             apiResponse = apiManager.apiPost(config.get("apiTimbangan").toString(), params);
