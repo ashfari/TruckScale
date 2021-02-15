@@ -5,6 +5,7 @@
  */
 package view;
 
+import controller.AveryWeighTronix;
 import controller.ConfigManager;
 import java.io.FileNotFoundException;
 import java.util.logging.Level;
@@ -18,8 +19,9 @@ import org.json.JSONObject;
  */
 public class FrmConfig extends javax.swing.JFrame {
 
-    ConfigManager configManager = new ConfigManager();
-    JSONObject config = new JSONObject();
+    ConfigManager configManager = null;
+    AveryWeighTronix averyWeighTronix = null;
+    JSONObject config = null;
     
     /**
      * Creates new form FrmConfig
@@ -29,17 +31,31 @@ public class FrmConfig extends javax.swing.JFrame {
         initComponents();
         this.setLocationRelativeTo(null);
         
+        createObjects();
+        
         config = configManager.getConfig();
         
-        index();
+        setForm();
     }
     
-    private void index() throws JSONException {
+    private void createObjects() {
+        this.configManager = new ConfigManager();
+        this.averyWeighTronix = new AveryWeighTronix(this);
+        this.config = new JSONObject();
+    }
+    
+    private void setForm() throws JSONException {
+        this.averyWeighTronix.getPorts();
+        
         txtTitleAplikasi.setText(config.getString("title"));
+        try {
+            cbComPort.setSelectedIndex(Integer.parseInt(config.get("comPort").toString()));
+        } catch (Exception e) {
+        }
         txtKodeTimbangan.setText(config.getString("kodeTimbangan"));
         txtApiNilaiTimbangan.setText(config.getString("apiTimbangan"));
         txtApiQrCode.setText(config.getString("apiQrCode"));
-        txtMinWeight.setText(config.getString("minWeight"));
+        txtMinWeight.setText(config.getString("minStepWeight"));
         txtRefreshRate.setText(config.getString("refreshRate"));
     }
 
@@ -65,6 +81,8 @@ public class FrmConfig extends javax.swing.JFrame {
         txtMinWeight = new javax.swing.JTextField();
         jLabel6 = new javax.swing.JLabel();
         txtRefreshRate = new javax.swing.JTextField();
+        jLabel7 = new javax.swing.JLabel();
+        cbComPort = new javax.swing.JComboBox<>();
         btnCancel = new javax.swing.JButton();
         btnOk = new javax.swing.JButton();
 
@@ -74,7 +92,7 @@ public class FrmConfig extends javax.swing.JFrame {
 
         jPanel1.setBackground(new java.awt.Color(255, 255, 255));
 
-        jLabel1.setText("Title Aplikasi");
+        jLabel1.setText("Nama Aplikasi");
 
         jLabel2.setText("Kode Timbangan");
 
@@ -82,9 +100,11 @@ public class FrmConfig extends javax.swing.JFrame {
 
         jLabel4.setText("URL API Post Data QR Code Scanner");
 
-        jLabel5.setText("Minimum Weight (kg)");
+        jLabel5.setText("Jarak Minimum Weight (kg)");
 
         jLabel6.setText("Refresh Rate (detik)");
+
+        jLabel7.setText("Port");
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -98,16 +118,18 @@ public class FrmConfig extends javax.swing.JFrame {
                     .addComponent(txtApiNilaiTimbangan)
                     .addComponent(txtApiQrCode)
                     .addComponent(txtMinWeight)
+                    .addComponent(txtRefreshRate)
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel1)
+                            .addComponent(jLabel7)
                             .addComponent(jLabel2)
                             .addComponent(jLabel3)
                             .addComponent(jLabel4)
                             .addComponent(jLabel5)
                             .addComponent(jLabel6))
                         .addGap(0, 183, Short.MAX_VALUE))
-                    .addComponent(txtRefreshRate))
+                    .addComponent(cbComPort, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
@@ -117,6 +139,10 @@ public class FrmConfig extends javax.swing.JFrame {
                 .addComponent(jLabel1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(txtTitleAplikasi, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jLabel7)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(cbComPort, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jLabel2)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -197,10 +223,11 @@ public class FrmConfig extends javax.swing.JFrame {
     private JSONObject getNewConfig() throws JSONException{
         JSONObject newConfig = new JSONObject();
         newConfig.put("title", txtTitleAplikasi.getText());
+        newConfig.put("comPort", cbComPort.getSelectedIndex());
         newConfig.put("kodeTimbangan", txtKodeTimbangan.getText());
         newConfig.put("apiTimbangan", txtApiNilaiTimbangan.getText());
         newConfig.put("apiQrCode", txtApiQrCode.getText());
-        newConfig.put("minWeight", txtMinWeight.getText());
+        newConfig.put("minStepWeight", txtMinWeight.getText());
         newConfig.put("refreshRate", txtRefreshRate.getText());
         
         return newConfig;
@@ -255,12 +282,14 @@ public class FrmConfig extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnCancel;
     private javax.swing.JButton btnOk;
+    public javax.swing.JComboBox<String> cbComPort;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
+    private javax.swing.JLabel jLabel7;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JTextField txtApiNilaiTimbangan;
     private javax.swing.JTextField txtApiQrCode;

@@ -6,8 +6,8 @@
 package view;
 
 import controller.ApiManager;
+import controller.AveryWeighTronix;
 import controller.ConfigManager;
-//import controller.Communicator;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -28,28 +28,40 @@ import org.json.JSONObject;
  */
 public class FrmMain extends javax.swing.JFrame {
 
-    ConfigManager configManager = new ConfigManager();
-    ApiManager apiManager = new ApiManager();
-    Map params = new LinkedHashMap<>();
-    Map prevParams = new LinkedHashMap<>();
-    JSONObject config = new JSONObject();
+    ConfigManager configManager = null;
+    ApiManager apiManager = null;
+    AveryWeighTronix averyWeighTronix = null;
+    Map params = null;
+    Map prevParams = null;
+    public JSONObject config = new JSONObject();
     SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
     Date date = new Date();
     int refreshRateConfig = 0;
     int refreshRate = 0;
+    public JSONObject currentWeight = null;
+    String apiResponse = "";
 
     /**
      * Creates new form FrmMain
      */
     public FrmMain() throws JSONException, FileNotFoundException {
-        this.setUndecorated(true);
         initComponents();
         this.setLocationRelativeTo(null);
 
+        createObjects();
         config = configManager.getConfig();
 
         implementConfig();
         refreshPerSecond();
+    }
+    
+    public void createObjects() throws JSONException, FileNotFoundException {
+        this.params = new LinkedHashMap<>();
+        this.prevParams = new LinkedHashMap<>();
+        this.currentWeight = new JSONObject();
+        this.configManager = new ConfigManager();
+        this.apiManager = new ApiManager();
+        this.averyWeighTronix = new AveryWeighTronix(this);
     }
 
     private void implementConfig() throws JSONException {
@@ -85,19 +97,19 @@ public class FrmMain extends javax.swing.JFrame {
                     dotLabel.setEnabled(true);
                     
                     try {
-                        if (Double.parseDouble(current_weight.getText().toString()) > Double.parseDouble(config.get("minWeight").toString())) {
+                        if ((Double.parseDouble(currentWeight.get("value").toString())
+                                - Double.parseDouble(weightValue.getText().toString())) 
+                                > Double.parseDouble(config.get("minStepWeight").toString())) {
                             params.put("weigh_bridge_id", config.get("kodeTimbangan"));
-                            params.put("value_in_kg", Double.parseDouble(current_weight.getText()));
-                            if (prevParams.get("value_in_kg") == null || Double.parseDouble(prevParams.get("value_in_kg").toString()) != Double.parseDouble(params.get("value_in_kg").toString())) {
-                                apiManager.apiPost(config.get("apiTimbangan").toString(), params);
-                            }
+                            params.put("value_in_kg", Double.parseDouble(weightValue.getText()));
+                            apiResponse = apiManager.apiPost(config.get("apiTimbangan").toString(), params);
                         }
                     } catch (JSONException ex) {
-                        Logger.getLogger(FrmMain.class.getName()).log(Level.SEVERE, null, ex);
+//                        Logger.getLogger(FrmMain.class.getName()).log(Level.SEVERE, null, ex);
                     } catch (UnsupportedEncodingException ex) {
-                        Logger.getLogger(FrmMain.class.getName()).log(Level.SEVERE, null, ex);
+//                        Logger.getLogger(FrmMain.class.getName()).log(Level.SEVERE, null, ex);
                     } catch (IOException ex) {
-                        Logger.getLogger(FrmMain.class.getName()).log(Level.SEVERE, null, ex);
+//                        Logger.getLogger(FrmMain.class.getName()).log(Level.SEVERE, null, ex);
                     }
                     prevParams = params;
                     refreshRate = 0;
@@ -119,15 +131,11 @@ public class FrmMain extends javax.swing.JFrame {
         jPanel1 = new javax.swing.JPanel();
         main_title = new javax.swing.JLabel();
         jPanel2 = new javax.swing.JPanel();
-        current_weight = new javax.swing.JTextField();
+        weightValue = new javax.swing.JTextField();
         jLabel1 = new javax.swing.JLabel();
+        weightUnit = new javax.swing.JLabel();
         jButton1 = new javax.swing.JButton();
         jPanel4 = new javax.swing.JPanel();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        txtLog = new javax.swing.JTextArea();
-        cboxPorts = new javax.swing.JComboBox<>();
-        jLabel2 = new javax.swing.JLabel();
-        refreshPort = new javax.swing.JButton();
         jPanel3 = new javax.swing.JPanel();
         date_time_counter = new javax.swing.JLabel();
         dotLabel = new javax.swing.JLabel();
@@ -165,13 +173,18 @@ public class FrmMain extends javax.swing.JFrame {
 
         jPanel2.setBackground(new java.awt.Color(255, 255, 255));
 
-        current_weight.setFont(new java.awt.Font("Arial", 1, 60)); // NOI18N
-        current_weight.setHorizontalAlignment(javax.swing.JTextField.CENTER);
-        current_weight.setText("20.00");
+        weightValue.setFont(new java.awt.Font("Arial", 1, 60)); // NOI18N
+        weightValue.setHorizontalAlignment(javax.swing.JTextField.CENTER);
+        weightValue.setText("0");
+        weightValue.setPreferredSize(new java.awt.Dimension(155, 40));
 
         jLabel1.setFont(new java.awt.Font("Arial", 1, 48)); // NOI18N
         jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabel1.setText("WEIGHT");
+
+        weightUnit.setFont(new java.awt.Font("Arial", 1, 48)); // NOI18N
+        weightUnit.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
+        weightUnit.setText("Kg");
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -181,20 +194,24 @@ public class FrmMain extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, 372, Short.MAX_VALUE)
-                    .addComponent(current_weight))
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addComponent(weightValue, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(weightUnit, javax.swing.GroupLayout.PREFERRED_SIZE, 78, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(current_weight, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(weightValue, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(weightUnit))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, 72, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
-        jButton1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/setting.png"))); // NOI18N
         jButton1.setText("Config");
         jButton1.setToolTipText("");
         jButton1.addActionListener(new java.awt.event.ActionListener() {
@@ -205,61 +222,25 @@ public class FrmMain extends javax.swing.JFrame {
 
         jPanel4.setBackground(new java.awt.Color(255, 255, 255));
 
-        txtLog.setColumns(20);
-        txtLog.setRows(5);
-        jScrollPane1.setViewportView(txtLog);
-
-        cboxPorts.setSelectedIndex(-1);
-
-        jLabel2.setText("Ports   :");
-
-        refreshPort.setText("Refresh");
-        refreshPort.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                refreshPortActionPerformed(evt);
-            }
-        });
-
         javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
         jPanel4.setLayout(jPanel4Layout);
         jPanel4Layout.setHorizontalGroup(
             jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel4Layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1)
-                    .addGroup(jPanel4Layout.createSequentialGroup()
-                        .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(cboxPorts, 0, 195, Short.MAX_VALUE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(refreshPort)))
-                .addContainerGap())
+            .addGap(0, 382, Short.MAX_VALUE)
         );
         jPanel4Layout.setVerticalGroup(
             jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel4Layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                        .addComponent(cboxPorts, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, 23, Short.MAX_VALUE))
-                    .addComponent(refreshPort, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 78, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addGap(0, 431, Short.MAX_VALUE)
         );
 
         jPanel3.setBackground(new java.awt.Color(255, 255, 255));
 
         date_time_counter.setText("08/02/2021 05:46:58");
 
-        dotLabel.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/dot.png"))); // NOI18N
-
         refreshRateLabel.setText("1s");
 
         jLabel4.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel4.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/refresh.png"))); // NOI18N
+        jLabel4.setText("Refresh");
         jLabel4.setAlignmentY(0.0F);
 
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
@@ -295,10 +276,9 @@ public class FrmMain extends javax.swing.JFrame {
         );
         jPanel5Layout.setVerticalGroup(
             jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 199, Short.MAX_VALUE)
+            .addGap(0, 205, Short.MAX_VALUE)
         );
 
-        exit.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/exit.png"))); // NOI18N
         exit.setText("Exit");
         exit.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
         exit.addActionListener(new java.awt.event.ActionListener() {
@@ -370,11 +350,6 @@ public class FrmMain extends javax.swing.JFrame {
         System.exit(0);
     }//GEN-LAST:event_exitActionPerformed
 
-    private void refreshPortActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_refreshPortActionPerformed
-        // TODO add your handling code here:
-//        communicator.searchForPorts();
-    }//GEN-LAST:event_refreshPortActionPerformed
-
     /**
      * @param args the command line arguments
      */
@@ -417,24 +392,20 @@ public class FrmMain extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    public javax.swing.JComboBox<String> cboxPorts;
-    private javax.swing.JTextField current_weight;
     private javax.swing.JLabel date_time_counter;
     private javax.swing.JLabel dotLabel;
     private javax.swing.JButton exit;
     private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
     private javax.swing.JPanel jPanel5;
-    private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JLabel main_title;
-    private javax.swing.JButton refreshPort;
     private javax.swing.JLabel refreshRateLabel;
-    public javax.swing.JTextArea txtLog;
+    private javax.swing.JLabel weightUnit;
+    private javax.swing.JTextField weightValue;
     // End of variables declaration//GEN-END:variables
 }

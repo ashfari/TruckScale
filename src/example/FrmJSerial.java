@@ -8,7 +8,7 @@ package example;
 import com.fazecast.jSerialComm.SerialPort;
 import com.fazecast.jSerialComm.SerialPortDataListener;
 import com.fazecast.jSerialComm.SerialPortEvent;
-import controller.JSerialManager;
+import controller.AveryWeighTronix;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.logging.Level;
@@ -22,7 +22,7 @@ import org.json.JSONObject;
  */
 public class FrmJSerial extends javax.swing.JFrame {
     
-    JSerialManager jSerialManager = null;
+    AveryWeighTronix jSerialManager = null;
     JSONObject weight = null;
     String message = "";
 
@@ -32,7 +32,7 @@ public class FrmJSerial extends javax.swing.JFrame {
     public FrmJSerial() {
         initComponents();
         this.setLocationRelativeTo(null);
-        jSerialManager = new JSerialManager();
+        jSerialManager = new AveryWeighTronix();
         
         try {
             dataListener();

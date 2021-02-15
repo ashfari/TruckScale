@@ -8,24 +8,38 @@ package controller;
 import com.fazecast.jSerialComm.SerialPort;
 import com.fazecast.jSerialComm.SerialPortDataListener;
 import com.fazecast.jSerialComm.SerialPortEvent;
+import java.io.FileNotFoundException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
+import view.FrmConfig;
+import view.FrmMain;
 
 /**
  *
  * @author Sahab
  */
-public class JSerialManager {
+public class AveryWeighTronix {
     
+    FrmMain window = null;
+    FrmConfig windowConfig = null;
     String message = "";
+    String messages[] = null;
     JSONObject weight = null;
+    SerialPort comPort = null;
+    SerialPort[] comPorts = null;
+
+    public AveryWeighTronix(FrmConfig windowConfig) {
+        this.windowConfig = windowConfig;
+    }
     
-    public JSONObject getWeight() {
-        weight = new JSONObject();
-        
-        SerialPort comPort = SerialPort.getCommPorts()[0];
+    public AveryWeighTronix(FrmMain window) throws JSONException, FileNotFoundException {
+        this.window = window;
+    }
+    
+    public void getWeight() throws JSONException {
+        comPort = SerialPort.getCommPorts()[Integer.parseInt(window.config.get("comPort").toString())];
         comPort.openPort();
         comPort.addDataListener(new SerialPortDataListener() {
             @Override
@@ -41,24 +55,26 @@ public class JSerialManager {
                     if (newData[i] == 2) {
                         message = "";
                     } else if (newData[i] == 3) {
-                        String messages[] = message.trim().split("\\s");
-                        System.out.println("length" + messages.length);
-                        System.out.println(message);
-                        
+                        messages = message.trim().split("\\s");
                         try {
-                            weight.put("value", messages[0]);
-                            weight.put("unit", messages[1]);
+                            window.currentWeight.put("value", messages[0]);
+                            window.currentWeight.put("unit", messages[1]);
                         } catch (JSONException ex) {
-                            Logger.getLogger(JSerialManager.class.getName()).log(Level.SEVERE, null, ex);
+                            Logger.getLogger(AveryWeighTronix.class.getName()).log(Level.SEVERE, null, ex);
                         }
-                        comPort.closePort();
                     } else {
                         message += (char) newData[i];
                     }
                 }
             }
         });
+    }
+    
+    public void getPorts() {
+        comPorts = SerialPort.getCommPorts();
         
-        return weight;
+        for (int i = 0; i < comPorts.length; i++) {
+            windowConfig.cbComPort.addItem(comPorts[i].getDescriptivePortName());
+        }
     }
 }

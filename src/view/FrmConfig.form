@@ -78,9 +78,11 @@
                       <Component id="txtApiNilaiTimbangan" alignment="0" max="32767" attributes="0"/>
                       <Component id="txtApiQrCode" alignment="0" max="32767" attributes="0"/>
                       <Component id="txtMinWeight" alignment="0" max="32767" attributes="0"/>
+                      <Component id="txtRefreshRate" alignment="0" max="32767" attributes="0"/>
                       <Group type="102" attributes="0">
                           <Group type="103" groupAlignment="0" attributes="0">
                               <Component id="jLabel1" min="-2" max="-2" attributes="0"/>
+                              <Component id="jLabel7" alignment="0" min="-2" max="-2" attributes="0"/>
                               <Component id="jLabel2" alignment="0" min="-2" max="-2" attributes="0"/>
                               <Component id="jLabel3" alignment="0" min="-2" max="-2" attributes="0"/>
                               <Component id="jLabel4" alignment="0" min="-2" max="-2" attributes="0"/>
@@ -89,7 +91,7 @@
                           </Group>
                           <EmptySpace min="0" pref="183" max="32767" attributes="0"/>
                       </Group>
-                      <Component id="txtRefreshRate" alignment="0" max="32767" attributes="0"/>
+                      <Component id="cbComPort" alignment="0" max="32767" attributes="0"/>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
               </Group>
@@ -102,6 +104,10 @@
                   <Component id="jLabel1" min="-2" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
                   <Component id="txtTitleAplikasi" min="-2" max="-2" attributes="0"/>
+                  <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                  <Component id="jLabel7" min="-2" max="-2" attributes="0"/>
+                  <EmptySpace max="-2" attributes="0"/>
+                  <Component id="cbComPort" min="-2" max="-2" attributes="0"/>
                   <EmptySpace type="unrelated" max="-2" attributes="0"/>
                   <Component id="jLabel2" min="-2" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
@@ -130,7 +136,7 @@
       <SubComponents>
         <Component class="javax.swing.JLabel" name="jLabel1">
           <Properties>
-            <Property name="text" type="java.lang.String" value="Title Aplikasi"/>
+            <Property name="text" type="java.lang.String" value="Nama Aplikasi"/>
           </Properties>
         </Component>
         <Component class="javax.swing.JTextField" name="txtTitleAplikasi">
@@ -158,7 +164,7 @@
         </Component>
         <Component class="javax.swing.JLabel" name="jLabel5">
           <Properties>
-            <Property name="text" type="java.lang.String" value="Minimum Weight (kg)"/>
+            <Property name="text" type="java.lang.String" value="Jarak Minimum Weight (kg)"/>
           </Properties>
         </Component>
         <Component class="javax.swing.JTextField" name="txtMinWeight">
@@ -169,6 +175,22 @@
           </Properties>
         </Component>
         <Component class="javax.swing.JTextField" name="txtRefreshRate">
+        </Component>
+        <Component class="javax.swing.JLabel" name="jLabel7">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Port"/>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JComboBox" name="cbComPort">
+          <Properties>
+            <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
+              <StringArray count="0"/>
+            </Property>
+          </Properties>
+          <AuxValues>
+            <AuxValue name="JavaCodeGenerator_TypeParameters" type="java.lang.String" value="&lt;String&gt;"/>
+            <AuxValue name="JavaCodeGenerator_VariableModifier" type="java.lang.Integer" value="1"/>
+          </AuxValues>
         </Component>
       </SubComponents>
     </Container>

@@ -47,10 +47,11 @@ public class ConfigManager {
 //        Config JSON
         JSONObject config = new JSONObject();
         config.put("title", "Truck Scale");
+        config.put("comPort", "0");
         config.put("kodeTimbangan", "1");
         config.put("apiTimbangan", "http://localhost:8000/api/v1/timbangan");
         config.put("apiQrCode", "http://localhost:8000/api/v1/qrcode");
-        config.put("minWeight", "50");
+        config.put("minStepWeight", "50");
         config.put("refreshRate", "1");
         
 //        Write file

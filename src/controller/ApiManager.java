@@ -23,7 +23,7 @@ import java.util.Map;
  */
 public class ApiManager {
     
-    public void apiPost(String api, Map params) throws MalformedURLException, UnsupportedEncodingException, IOException {
+    public String apiPost(String api, Map params) throws MalformedURLException, UnsupportedEncodingException, IOException {
         URL url = new URL(api);
         StringBuilder postData = new StringBuilder();
         for (Iterator it = params.entrySet().iterator(); it.hasNext();) {
@@ -49,6 +49,7 @@ public class ApiManager {
             sb.append((char) c);
         }
         String response = sb.toString();
-        System.out.println(response);
+        
+        return response;
     }
 }
