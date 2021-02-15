@@ -62,6 +62,7 @@ public class AveryWeighTronix {
                         try {
                             window.currentWeight.put("value", messages[0]);
                             window.currentWeight.put("unit", messages[1]);
+                            window.txtLog.append(message + "\n");
                         } catch (JSONException ex) {
                             Logger.getLogger(AveryWeighTronix.class.getName()).log(Level.SEVERE, null, ex);
                         }
