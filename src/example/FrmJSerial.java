@@ -86,7 +86,11 @@ public class FrmJSerial extends javax.swing.JFrame {
             @Override
             public void run() {
                 weight = new JSONObject();
-                weight = jSerialManager.getWeight();
+                try {
+                    jSerialManager.getWeight();
+                } catch (JSONException ex) {
+                    Logger.getLogger(FrmJSerial.class.getName()).log(Level.SEVERE, null, ex);
+                }
                 try {
                     serialMessage.append("value => " + weight.get("value"));
                     serialMessage.append("unit => " + weight.get("unit"));

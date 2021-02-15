@@ -30,6 +30,9 @@ public class AveryWeighTronix {
     SerialPort comPort = null;
     SerialPort[] comPorts = null;
 
+    public AveryWeighTronix() {
+    }
+
     public AveryWeighTronix(FrmConfig windowConfig) {
         this.windowConfig = windowConfig;
     }
