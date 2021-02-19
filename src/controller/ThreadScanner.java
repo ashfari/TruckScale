@@ -67,10 +67,15 @@ public class ThreadScanner extends Thread {
             frmMain.averyWeighTronix.getWeight();
         } catch (Exception e) {
         }
+        frmMain.setTitle(frmMain.config.getString("title"));
     }
     
     private void resetDelay() {
-        delay = 9;
+        try {
+            delay = (int) (Double.parseDouble(frmMain.config.getString("delayScan")) * (1000 / sleepTime));
+        } catch (JSONException ex) {
+            Logger.getLogger(ThreadScanner.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
     
     private void resetDelayNoScan() {
@@ -156,11 +161,17 @@ public class ThreadScanner extends Thread {
             frmMain.txtResultScan.append("\n");
             frmMain.txtResultScan.append("Sopir: " + jsonDriver.getString("name"));
 
-            new FrmUpdateTrack(input).setVisible(true);
+            
             
         } catch (Exception e) {
             frmMain.txtResultScan.setForeground(Color.RED);
             frmMain.txtResultScan.setText("Gagal: QR Code tidak valid (" + resultJson.get("message").toString() + ")");
+        }
+        
+        try {
+            new FrmUpdateTrack(input, frmMain).setVisible(true);
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(ThreadScanner.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 }

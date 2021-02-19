@@ -5,9 +5,9 @@
  */
 package view;
 
+import java.awt.Color;
 import java.io.FileNotFoundException;
 import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.logging.Level;
@@ -18,63 +18,58 @@ import org.json.JSONException;
  *
  * @author Sahab
  */
-public class FrmUpdateTrack extends javax.swing.JFrame {
+public class FrmNotification extends javax.swing.JFrame {
 
     FrmMain frmMain = null;
     Timer timer = null;
     int counter = 0;
-    Map params = null;
-    String result = null;
-    String qrcode = null;
     
     /**
      * Creates new form FrmUpdateTrack
      */
-    public FrmUpdateTrack(String qrcode, FrmMain frmMain) throws JSONException, FileNotFoundException {
+    public FrmNotification(boolean isSuccess, FrmMain frmMain) {
         this.setUndecorated(true);
         initComponents();
         this.setLocationRelativeTo(null);
         
-        this.qrcode = qrcode;
         this.frmMain = frmMain;
-        createObjects();
+        createObjects(isSuccess);
         
-        sendUpdateTrack();
+        showNotification();
     }
     
-    public void createObjects() throws JSONException, FileNotFoundException {
+    public void createObjects(boolean isSuccess) {
         timer = new Timer();
-        this.params = new LinkedHashMap<>();
-        counter = Integer.parseInt(frmMain.config.getString("delayOk"));
-        result = "";
+        try {
+            counter = Integer.parseInt(frmMain.config.getString("delayOk"));
+        } catch (JSONException ex) {
+            Logger.getLogger(FrmNotification.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        if (isSuccess) {
+            txtStatus.setForeground(new Color(0, 204, 51));
+            txtStatus.setText("Berhasil! Silahkan lanjutkan proses selanjutnya.");
+        } else {
+            txtStatus.setForeground(Color.RED);
+            txtStatus.setText("Gagal! Silahkan ulangi proses scan.");
+        }
     }
     
-    public void sendUpdateTrack() {
+    public void showNotification() {
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
                 btnOk.setText("OK (" + counter + ")");
                 counter--;
                 if (counter < 0) {
-                    params.put("qrcode", qrcode);
-                    try {
-                        updateData();
-                    } catch (Exception ex) {
-                        Logger.getLogger(FrmUpdateTrack.class.getName()).log(Level.SEVERE, null, ex);
-                    }
+                    timeout();
                 }
             }
         }, 0, 1000);
     }
     
-    private void updateData() throws JSONException, Exception {
+    private void timeout() {
+        frmMain.resetResultScan();
         timer.cancel();
-        btnOk.setEnabled(false);
-        btnCancel.setEnabled(false);
-        txtUpdateData.setText("Updating...");
-        result = "Status: " + frmMain.okHttpManager.sendPost(frmMain.config.get("apiUpdateTrack").toString(), params, frmMain.config.get("accessToken").toString());
-        System.out.println("Status : " + result);
-        new FrmNotification(true, frmMain).setVisible(true);
         this.setVisible(false);
     }
 
@@ -88,7 +83,7 @@ public class FrmUpdateTrack extends javax.swing.JFrame {
     private void initComponents() {
 
         jPanel1 = new javax.swing.JPanel();
-        txtUpdateData = new javax.swing.JLabel();
+        txtStatus = new javax.swing.JLabel();
         btnOk = new javax.swing.JButton();
         btnCancel = new javax.swing.JButton();
 
@@ -96,9 +91,9 @@ public class FrmUpdateTrack extends javax.swing.JFrame {
 
         jPanel1.setBackground(new java.awt.Color(255, 255, 255));
 
-        txtUpdateData.setFont(new java.awt.Font("Arial", 1, 12)); // NOI18N
-        txtUpdateData.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        txtUpdateData.setText("Lanjutkan Proses?");
+        txtStatus.setFont(new java.awt.Font("Arial", 1, 12)); // NOI18N
+        txtStatus.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        txtStatus.setText("Status");
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -106,14 +101,14 @@ public class FrmUpdateTrack extends javax.swing.JFrame {
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(txtUpdateData, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(txtStatus, javax.swing.GroupLayout.DEFAULT_SIZE, 360, Short.MAX_VALUE)
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(txtUpdateData)
+                .addComponent(txtStatus)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -139,12 +134,12 @@ public class FrmUpdateTrack extends javax.swing.JFrame {
                 .addContainerGap()
                 .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())
-            .addGroup(layout.createSequentialGroup()
-                .addGap(80, 80, 80)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(btnOk, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addComponent(btnCancel, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(82, Short.MAX_VALUE))
+                .addGap(130, 130, 130))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -163,18 +158,13 @@ public class FrmUpdateTrack extends javax.swing.JFrame {
 
     private void btnCancelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCancelActionPerformed
         // TODO add your handling code here:
-        timer.cancel();
-        this.setVisible(false);
+        timeout();
     }//GEN-LAST:event_btnCancelActionPerformed
 
     private void btnOkActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnOkActionPerformed
         // TODO add your handling code here:
         counter = 0;
-        try {
-            updateData();
-        } catch (Exception ex) {
-            Logger.getLogger(FrmUpdateTrack.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        timeout();
     }//GEN-LAST:event_btnOkActionPerformed
 
     /**
@@ -194,25 +184,26 @@ public class FrmUpdateTrack extends javax.swing.JFrame {
                 }
             }
         } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(FrmUpdateTrack.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(FrmNotification.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(FrmUpdateTrack.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(FrmNotification.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(FrmUpdateTrack.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(FrmNotification.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(FrmUpdateTrack.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(FrmNotification.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
+        //</editor-fold>
         //</editor-fold>
 
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
                 try {
-                    new FrmUpdateTrack("", new FrmMain()).setVisible(true);
+                    new FrmNotification(true, new FrmMain()).setVisible(true);
                 } catch (JSONException ex) {
-                    Logger.getLogger(FrmUpdateTrack.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(FrmNotification.class.getName()).log(Level.SEVERE, null, ex);
                 } catch (FileNotFoundException ex) {
-                    Logger.getLogger(FrmUpdateTrack.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(FrmNotification.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
         });
@@ -222,6 +213,6 @@ public class FrmUpdateTrack extends javax.swing.JFrame {
     private javax.swing.JButton btnCancel;
     private javax.swing.JButton btnOk;
     private javax.swing.JPanel jPanel1;
-    private javax.swing.JLabel txtUpdateData;
+    private javax.swing.JLabel txtStatus;
     // End of variables declaration//GEN-END:variables
 }
