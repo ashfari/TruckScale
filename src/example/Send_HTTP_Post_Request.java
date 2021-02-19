@@ -59,7 +59,6 @@ public class Send_HTTP_Post_Request {
         conn.setDoOutput(true);
         conn.getOutputStream().write(postDataBytes);
         
-        
         Reader in = new BufferedReader(new InputStreamReader(conn.getInputStream(), "UTF-8"));
         StringBuilder sb = new StringBuilder();
         for (int c; (c = in.read()) >= 0;) {

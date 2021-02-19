@@ -5,18 +5,17 @@
  */
 package view;
 
+import controller.ThreadWeight;
+import controller.ThreadScanner;
 import controller.ApiManager;
 import controller.AveryWeighTronix;
 import controller.ConfigManager;
+import controller.OkHttpManager;
+import controller.PasswordManager;
+import java.awt.KeyEventDispatcher;
+import java.awt.KeyboardFocusManager;
+import java.awt.event.KeyEvent;
 import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.json.JSONException;
@@ -27,19 +26,16 @@ import org.json.JSONObject;
  * @author Sahab
  */
 public class FrmMain extends javax.swing.JFrame {
-
-    ConfigManager configManager = null;
-    ApiManager apiManager = null;
-    AveryWeighTronix averyWeighTronix = null;
-    Map params = null;
-    Map prevParams = null;
-    public JSONObject config = new JSONObject();
-    SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
-    Date date = new Date();
-    int refreshRateConfig = 0;
-    int refreshRate = 0;
+    
+    ThreadWeight threadWeight = null;
+    ThreadScanner threadScanner = null;
+    public AveryWeighTronix averyWeighTronix = null;
+    public ConfigManager configManager = null;
     public JSONObject currentWeight = null;
-    String apiResponse = "";
+    public JSONObject config = new JSONObject();
+    public ApiManager apiManager = null;
+    public OkHttpManager okHttpManager = null;
+    public String scannerInput = null;
 
     /**
      * Creates new form FrmMain
@@ -49,79 +45,42 @@ public class FrmMain extends javax.swing.JFrame {
         this.setLocationRelativeTo(null);
 
         createObjects();
-        config = configManager.getConfig();
 
-        implementConfig();
-        refreshPerSecond();
+        threadScanner.start();
+        threadWeight.start();
     }
     
     public void createObjects() throws JSONException, FileNotFoundException {
-        this.params = new LinkedHashMap<>();
-        this.prevParams = new LinkedHashMap<>();
-        this.currentWeight = new JSONObject();
+        this.scannerInput = "";
+        this.threadWeight = new ThreadWeight(this);
+        this.threadScanner = new ThreadScanner(this);
+        this.averyWeighTronix = new AveryWeighTronix();
         this.configManager = new ConfigManager();
         this.apiManager = new ApiManager();
-        this.averyWeighTronix = new AveryWeighTronix(this);
+        this.okHttpManager = new OkHttpManager();
+        this.currentWeight = new JSONObject();
+        this.config = new JSONObject();
+        this.config = this.configManager.getConfig();
+        new PasswordManager().createPassword();
+        globalKeyListener();
+        txtResultScan.setLineWrap(true);
     }
-
-    private void implementConfig() throws JSONException {
-        dotLabel.setEnabled(false);
-        main_title.setText(config.getString("title"));
-        refreshRateLabel.setText(config.get("refreshRate") + "s");
-        averyWeighTronix.getWeight();
-    }
-
-    private void refreshPerSecond() {
-        Timer timer = new Timer();
-
-        TimerTask task = new TimerTask() {
-            @Override
-            public void run() {
-//                Show Date
-                date = new Date();
-                date_time_counter.setText(formatter.format(date));
-                
-//                Set UI based Config
-                try {
-                    config = configManager.readConfig();
-                    implementConfig();
-                    refreshRateConfig = Integer.parseInt((String) config.get("refreshRate"));
-                } catch (JSONException ex) {
-                    Logger.getLogger(FrmMain.class.getName()).log(Level.SEVERE, null, ex);
-                } catch (FileNotFoundException ex) {
-                    Logger.getLogger(FrmMain.class.getName()).log(Level.SEVERE, null, ex);
-                }
-
-//                Get Data from WeighBridge
-                refreshRate++;
-                if (refreshRate >= refreshRateConfig) {
-                    dotLabel.setEnabled(true);
-                    
-                    try {
-                        if ((Double.parseDouble(currentWeight.get("value").toString())
-                                - Double.parseDouble(weightValue.getText().toString())) 
-                                > Double.parseDouble(config.get("minStepWeight").toString())) {
-                            weightValue.setText(currentWeight.get("value").toString());
-                            weightUnit.setText(currentWeight.get("unit").toString());
-                            params.put("weigh_bridge_id", config.get("kodeTimbangan"));
-                            params.put("value_in_kg", Double.parseDouble(weightValue.getText()));
-                            apiResponse = apiManager.apiPost(config.get("apiTimbangan").toString(), params);
+    
+    public void globalKeyListener() {
+        KeyboardFocusManager.getCurrentKeyboardFocusManager()
+                .addKeyEventDispatcher(new KeyEventDispatcher() {
+                    @Override
+                    public boolean dispatchKeyEvent(KeyEvent e) {
+                        if (e.getID() == KeyEvent.KEY_PRESSED) {
+                            if (e.getKeyCode() > 40 && e.getKeyCode() != 32) {
+                                scannerInput += e.getKeyChar() + "";
+                            }
                         }
-                    } catch (JSONException ex) {
-//                        Logger.getLogger(FrmMain.class.getName()).log(Level.SEVERE, null, ex);
-                    } catch (UnsupportedEncodingException ex) {
-//                        Logger.getLogger(FrmMain.class.getName()).log(Level.SEVERE, null, ex);
-                    } catch (IOException ex) {
-//                        Logger.getLogger(FrmMain.class.getName()).log(Level.SEVERE, null, ex);
+                        return false;
                     }
-                    prevParams = params;
-                    refreshRate = 0;
-                }
-            }
-        };
-        timer.scheduleAtFixedRate(task, 1000, 1000);
+                });
     }
- 
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -134,13 +93,14 @@ public class FrmMain extends javax.swing.JFrame {
         jPanel1 = new javax.swing.JPanel();
         main_title = new javax.swing.JLabel();
         jPanel2 = new javax.swing.JPanel();
-        weightValue = new javax.swing.JTextField();
         jLabel1 = new javax.swing.JLabel();
-        weightUnit = new javax.swing.JLabel();
         jButton1 = new javax.swing.JButton();
         jPanel4 = new javax.swing.JPanel();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        txtResultScan = new javax.swing.JTextArea();
+        jLabel2 = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
-        txtLog = new javax.swing.JTextArea();
+        txtCoba = new javax.swing.JTextArea();
         jPanel3 = new javax.swing.JPanel();
         date_time_counter = new javax.swing.JLabel();
         dotLabel = new javax.swing.JLabel();
@@ -148,6 +108,9 @@ public class FrmMain extends javax.swing.JFrame {
         jLabel4 = new javax.swing.JLabel();
         jPanel5 = new javax.swing.JPanel();
         exit = new javax.swing.JButton();
+        jPanel6 = new javax.swing.JPanel();
+        weightValue = new javax.swing.JLabel();
+        weightUnit = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setMinimumSize(new java.awt.Dimension(800, 600));
@@ -155,7 +118,7 @@ public class FrmMain extends javax.swing.JFrame {
 
         jPanel1.setBackground(new java.awt.Color(255, 255, 255));
 
-        main_title.setFont(new java.awt.Font("Arial", 1, 36)); // NOI18N
+        main_title.setFont(new java.awt.Font("Monospaced", 1, 36)); // NOI18N
         main_title.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         main_title.setText("Main Title");
 
@@ -172,24 +135,16 @@ public class FrmMain extends javax.swing.JFrame {
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(main_title, javax.swing.GroupLayout.DEFAULT_SIZE, 48, Short.MAX_VALUE)
+                .addComponent(main_title, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
         jPanel2.setBackground(new java.awt.Color(255, 255, 255));
+        jPanel2.setPreferredSize(new java.awt.Dimension(434, 78));
 
-        weightValue.setFont(new java.awt.Font("Arial", 1, 60)); // NOI18N
-        weightValue.setHorizontalAlignment(javax.swing.JTextField.CENTER);
-        weightValue.setText("0");
-        weightValue.setPreferredSize(new java.awt.Dimension(155, 40));
-
-        jLabel1.setFont(new java.awt.Font("Arial", 1, 48)); // NOI18N
+        jLabel1.setFont(new java.awt.Font("Monospaced", 1, 48)); // NOI18N
         jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabel1.setText("WEIGHT");
-
-        weightUnit.setFont(new java.awt.Font("Arial", 1, 48)); // NOI18N
-        weightUnit.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
-        weightUnit.setText("Kg");
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -197,23 +152,14 @@ public class FrmMain extends javax.swing.JFrame {
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, 372, Short.MAX_VALUE)
-                    .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addComponent(weightValue, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(weightUnit, javax.swing.GroupLayout.PREFERRED_SIZE, 78, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, 414, Short.MAX_VALUE)
                 .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(weightValue, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(weightUnit))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, 72, Short.MAX_VALUE)
+                .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
@@ -227,9 +173,20 @@ public class FrmMain extends javax.swing.JFrame {
 
         jPanel4.setBackground(new java.awt.Color(255, 255, 255));
 
-        txtLog.setColumns(20);
-        txtLog.setRows(5);
-        jScrollPane1.setViewportView(txtLog);
+        txtResultScan.setEditable(false);
+        txtResultScan.setColumns(20);
+        txtResultScan.setFont(new java.awt.Font("Monospaced", 0, 18)); // NOI18N
+        txtResultScan.setRows(5);
+        jScrollPane2.setViewportView(txtResultScan);
+
+        jLabel2.setFont(new java.awt.Font("Monospaced", 1, 18)); // NOI18N
+        jLabel2.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel2.setText("QR Code Scan");
+
+        txtCoba.setColumns(20);
+        txtCoba.setRows(5);
+        txtCoba.setText("saflksafhksafnaslfsal\n");
+        jScrollPane1.setViewportView(txtCoba);
 
         javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
         jPanel4.setLayout(jPanel4Layout);
@@ -237,14 +194,21 @@ public class FrmMain extends javax.swing.JFrame {
             jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel4Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 362, Short.MAX_VALUE)
+                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 320, Short.MAX_VALUE)
+                    .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jScrollPane1))
                 .addContainerGap())
         );
         jPanel4Layout.setVerticalGroup(
             jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel4Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane1)
+                .addComponent(jLabel2)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 148, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
 
@@ -265,7 +229,7 @@ public class FrmMain extends javax.swing.JFrame {
             .addGroup(jPanel3Layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(date_time_counter, javax.swing.GroupLayout.PREFERRED_SIZE, 372, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 323, Short.MAX_VALUE)
                 .addComponent(jLabel4)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(refreshRateLabel)
@@ -291,7 +255,7 @@ public class FrmMain extends javax.swing.JFrame {
         );
         jPanel5Layout.setVerticalGroup(
             jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 205, Short.MAX_VALUE)
+            .addGap(0, 118, Short.MAX_VALUE)
         );
 
         exit.setText("Exit");
@@ -301,6 +265,40 @@ public class FrmMain extends javax.swing.JFrame {
                 exitActionPerformed(evt);
             }
         });
+
+        jPanel6.setBackground(new java.awt.Color(153, 204, 255));
+        jPanel6.setPreferredSize(new java.awt.Dimension(434, 136));
+
+        weightValue.setFont(new java.awt.Font("Monospaced", 1, 75)); // NOI18N
+        weightValue.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        weightValue.setText("0");
+
+        weightUnit.setFont(new java.awt.Font("Monospaced", 1, 48)); // NOI18N
+        weightUnit.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        weightUnit.setText("Kg");
+
+        javax.swing.GroupLayout jPanel6Layout = new javax.swing.GroupLayout(jPanel6);
+        jPanel6.setLayout(jPanel6Layout);
+        jPanel6Layout.setHorizontalGroup(
+            jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel6Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(weightValue, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(weightUnit, javax.swing.GroupLayout.PREFERRED_SIZE, 75, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
+        );
+        jPanel6Layout.setVerticalGroup(
+            jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel6Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(weightValue, javax.swing.GroupLayout.DEFAULT_SIZE, 110, Short.MAX_VALUE)
+                    .addGroup(jPanel6Layout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(weightUnit)))
+                .addContainerGap())
+        );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -312,16 +310,17 @@ public class FrmMain extends javax.swing.JFrame {
                     .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jPanel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(jPanel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addGroup(layout.createSequentialGroup()
                                 .addComponent(jButton1)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(exit))
-                            .addComponent(jPanel4, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                            .addComponent(jPanel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -337,7 +336,9 @@ public class FrmMain extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jPanel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jPanel6, javax.swing.GroupLayout.DEFAULT_SIZE, 132, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, 86, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jPanel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -349,15 +350,7 @@ public class FrmMain extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        try {
-            // TODO add your handling code here:
-            FrmConfig frmConfig = new FrmConfig();
-            frmConfig.setVisible(true);
-        } catch (JSONException ex) {
-            Logger.getLogger(FrmMain.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (FileNotFoundException ex) {
-            Logger.getLogger(FrmMain.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        new FrmPassword().setVisible(true);
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void exitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exitActionPerformed
@@ -407,22 +400,26 @@ public class FrmMain extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JLabel date_time_counter;
-    private javax.swing.JLabel dotLabel;
+    public javax.swing.JLabel date_time_counter;
+    public javax.swing.JLabel dotLabel;
     private javax.swing.JButton exit;
     private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
     private javax.swing.JPanel jPanel5;
+    private javax.swing.JPanel jPanel6;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JLabel main_title;
-    private javax.swing.JLabel refreshRateLabel;
-    public javax.swing.JTextArea txtLog;
-    private javax.swing.JLabel weightUnit;
-    private javax.swing.JTextField weightValue;
+    private javax.swing.JScrollPane jScrollPane2;
+    public javax.swing.JLabel main_title;
+    public javax.swing.JLabel refreshRateLabel;
+    public javax.swing.JTextArea txtCoba;
+    public javax.swing.JTextArea txtResultScan;
+    public javax.swing.JLabel weightUnit;
+    public javax.swing.JLabel weightValue;
     // End of variables declaration//GEN-END:variables
 }

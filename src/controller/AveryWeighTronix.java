@@ -29,6 +29,8 @@ public class AveryWeighTronix {
     JSONObject weight = null;
     SerialPort comPort = null;
     SerialPort[] comPorts = null;
+    ConfigManager configManager = null;
+    public JSONObject config = new JSONObject();
 
     public AveryWeighTronix() {
     }
@@ -39,10 +41,12 @@ public class AveryWeighTronix {
     
     public AveryWeighTronix(FrmMain window) throws JSONException, FileNotFoundException {
         this.window = window;
+        this.configManager = new ConfigManager();
+        this.config = configManager.getConfig();
     }
     
     public void getWeight() throws JSONException {
-        comPort = SerialPort.getCommPorts()[Integer.parseInt(window.config.get("comPort").toString())];
+        comPort = SerialPort.getCommPorts()[Integer.parseInt(config.get("comPort").toString())];
         comPort.openPort();
         comPort.addDataListener(new SerialPortDataListener() {
             @Override
@@ -62,7 +66,7 @@ public class AveryWeighTronix {
                         try {
                             window.currentWeight.put("value", messages[0]);
                             window.currentWeight.put("unit", messages[1]);
-                            window.txtLog.append(message + "\n");
+//                            window.txtLog.append(message + "\n");
                         } catch (JSONException ex) {
                             Logger.getLogger(AveryWeighTronix.class.getName()).log(Level.SEVERE, null, ex);
                         }
