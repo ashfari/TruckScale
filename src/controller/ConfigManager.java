@@ -57,8 +57,9 @@ public class ConfigManager {
         config.put("minLengthQrCode", "100");
         config.put("minStepWeight", "50");
         config.put("refreshRate", "1");
-        config.put("delayScan", "900");
-        config.put("delayOk", "5000");
+        config.put("isDebugging", "true");
+        config.put("delayScan", "0.9");
+        config.put("delayOk", "5");
         
 //        Write file
         try (FileWriter file = new FileWriter("./config")) {

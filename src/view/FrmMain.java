@@ -18,6 +18,7 @@ import java.awt.KeyboardFocusManager;
 import java.awt.event.KeyEvent;
 import java.io.FileNotFoundException;
 import java.util.logging.Level;
+import java.util.logging.LogManager;
 import java.util.logging.Logger;
 import javax.swing.UIManager;
 import org.json.JSONException;
@@ -38,11 +39,13 @@ public class FrmMain extends javax.swing.JFrame {
     public ApiManager apiManager = null;
     public OkHttpManager okHttpManager = null;
     public String scannerInput = null;
+    public Logger logger = null;
+    public String isDebugging = "";
 
     /**
      * Creates new form FrmMain
      */
-    public FrmMain() throws JSONException, FileNotFoundException {
+    public FrmMain() {
         initComponents();
         this.setLocationRelativeTo(null);
 
@@ -52,19 +55,27 @@ public class FrmMain extends javax.swing.JFrame {
         threadWeight.start();
     }
     
-    public void createObjects() throws JSONException, FileNotFoundException {
-        this.scannerInput = "";
-        this.threadWeight = new ThreadWeight(this);
-        this.threadScanner = new ThreadScanner(this);
-        this.averyWeighTronix = new AveryWeighTronix();
-        this.configManager = new ConfigManager();
-        this.apiManager = new ApiManager();
-        this.okHttpManager = new OkHttpManager();
-        this.currentWeight = new JSONObject();
-        this.config = new JSONObject();
-        this.config = this.configManager.getConfig();
-        new PasswordManager().createPassword();
-        globalKeyListener();
+    public void createObjects() {
+        try {
+            this.configManager = new ConfigManager();
+            this.config = new JSONObject();
+            this.config = this.configManager.getConfig();
+            this.logger = LogManager.getLogManager().getLogger("");
+            setDebugging();
+            this.scannerInput = "";
+            this.threadWeight = new ThreadWeight(this);
+            this.threadScanner = new ThreadScanner(this);
+            this.averyWeighTronix = new AveryWeighTronix();
+            this.apiManager = new ApiManager();
+            this.okHttpManager = new OkHttpManager();
+            this.currentWeight = new JSONObject();
+            new PasswordManager().createPassword();
+            globalKeyListener();
+        } catch (JSONException ex) {
+            Logger.getLogger(FrmMain.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(FrmMain.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
     
     public void globalKeyListener() {
@@ -85,6 +96,19 @@ public class FrmMain extends javax.swing.JFrame {
     public void resetResultScan() {
         txtResultScan.setForeground(Color.BLACK);
         txtResultScan.setText("Ready...");
+    }
+    
+    public void setDebugging() {
+        try {
+            this.isDebugging = config.getString("isDebugging");
+        } catch (JSONException ex) {
+            Logger.getLogger(FrmMain.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        if (isDebugging.equals("true")) {
+            logger.setLevel(Level.INFO);
+        } else {
+            logger.setLevel(Level.OFF);
+        }
     }
     
     /**
@@ -270,7 +294,7 @@ public class FrmMain extends javax.swing.JFrame {
             jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel7Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jPanel6, javax.swing.GroupLayout.PREFERRED_SIZE, 121, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jPanel6, javax.swing.GroupLayout.DEFAULT_SIZE, 121, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, 199, Short.MAX_VALUE)
                 .addContainerGap())
@@ -365,7 +389,7 @@ public class FrmMain extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jSplitPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 350, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jSplitPane1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
@@ -415,13 +439,7 @@ public class FrmMain extends javax.swing.JFrame {
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                try {
-                    new FrmMain().setVisible(true);
-                } catch (JSONException ex) {
-                    Logger.getLogger(FrmMain.class.getName()).log(Level.SEVERE, null, ex);
-                } catch (FileNotFoundException ex) {
-                    Logger.getLogger(FrmMain.class.getName()).log(Level.SEVERE, null, ex);
-                }
+                new FrmMain().setVisible(true);
             }
         });
     }

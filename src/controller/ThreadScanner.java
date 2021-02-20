@@ -45,12 +45,12 @@ public class ThreadScanner extends Thread {
     JSONObject jsonDriver = null;
     public String resultUpdateData = "";
 
-    public ThreadScanner(FrmMain frmMain) throws JSONException, FileNotFoundException {
+    public ThreadScanner(FrmMain frmMain) {
         this.frmMain = frmMain;
         createObjects();
     }
     
-    private void createObjects() throws JSONException, FileNotFoundException {
+    private void createObjects() {
         scanner = new Scanner(System.in);
         bufferedReader = new BufferedReader(new InputStreamReader(System.in));
         this.scannerParams = new LinkedHashMap<>();
@@ -59,15 +59,20 @@ public class ThreadScanner extends Thread {
         resetDelayNoScan();
     }
     
-    private void implementConfig() throws JSONException {
+    private void implementConfig() {
+        frmMain.setDebugging();
         frmMain.dotLabel.setEnabled(false);
-        frmMain.main_title.setText(frmMain.config.getString("title"));
-        frmMain.refreshRateLabel.setText(frmMain.config.get("refreshRate") + "s");
+        try {
+            frmMain.main_title.setText(frmMain.config.getString("title"));
+            frmMain.refreshRateLabel.setText(frmMain.config.get("refreshRate") + "s");
+            frmMain.setTitle(frmMain.config.getString("title"));
+        } catch (JSONException ex) {
+            Logger.getLogger(ThreadScanner.class.getName()).log(Level.SEVERE, null, ex);
+        }
         try {
             frmMain.averyWeighTronix.getWeight();
         } catch (Exception e) {
         }
-        frmMain.setTitle(frmMain.config.getString("title"));
     }
     
     private void resetDelay() {
@@ -90,13 +95,15 @@ public class ThreadScanner extends Thread {
                 implementConfig();
                 
                 input =  frmMain.scannerInput;
-                System.out.println(input);
+                if (frmMain.config.getString("isDebugging").equals("true")) {
+                    System.out.println(input);
+                }
                 
                 if (input.length() >= Integer.parseInt(frmMain.config.get("minLengthQrCode").toString())) {
                     frmMain.txtResultScan.setForeground(Color.BLACK);
                     frmMain.txtResultScan.setText("Scanning...");
                     delay--;
-                    System.out.println(delay);
+                    
                     if (!input.equals(prevInput)) {
                         prevInput = input;
                         resetDelay();
@@ -161,17 +168,11 @@ public class ThreadScanner extends Thread {
             frmMain.txtResultScan.append("\n");
             frmMain.txtResultScan.append("Sopir: " + jsonDriver.getString("name"));
 
-            
+            new FrmUpdateTrack(input, frmMain).setVisible(true);
             
         } catch (Exception e) {
             frmMain.txtResultScan.setForeground(Color.RED);
             frmMain.txtResultScan.setText("Gagal: QR Code tidak valid (" + resultJson.get("message").toString() + ")");
-        }
-        
-        try {
-            new FrmUpdateTrack(input, frmMain).setVisible(true);
-        } catch (FileNotFoundException ex) {
-            Logger.getLogger(ThreadScanner.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 }

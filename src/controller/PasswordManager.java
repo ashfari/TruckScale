@@ -42,7 +42,7 @@ public class PasswordManager {
         if (!file.exists()) {
             //        Write file
             try (FileWriter newFile = new FileWriter("./key")) {
-                newFile.write("$2y$12$pMC/hGD2QGqdFjiu/L93Iu9jmoT2/25OOevcg4Lb9dgK/213nt/I2");
+                newFile.write("$2y$12$jQes5VWSX5sHgozwluVTIOMQMcczv1XXwDQMfVir6F.bhOHw.wHMq");
                 newFile.flush();
             } catch (IOException e) {
                 e.printStackTrace();

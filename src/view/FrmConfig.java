@@ -22,18 +22,17 @@ public class FrmConfig extends javax.swing.JFrame {
     ConfigManager configManager = null;
     AveryWeighTronix averyWeighTronix = null;
     JSONObject config = null;
+    String isDebugging = "";
     
     /**
      * Creates new form FrmConfig
      */
-    public FrmConfig() throws JSONException, FileNotFoundException {
+    public FrmConfig() {
         this.setUndecorated(true);
         initComponents();
         this.setLocationRelativeTo(null);
         
         createObjects();
-        
-        config = configManager.getConfig();
         
         setForm();
     }
@@ -42,9 +41,27 @@ public class FrmConfig extends javax.swing.JFrame {
         this.configManager = new ConfigManager();
         this.averyWeighTronix = new AveryWeighTronix(this);
         this.config = new JSONObject();
+        try {
+            config = configManager.getConfig();
+            isDebugging = config.getString("isDebugging");
+        } catch (JSONException ex) {
+            Logger.getLogger(FrmConfig.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(FrmConfig.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
     
-    private void setForm() throws JSONException {
+    private void setDebugging() {
+        if (isDebugging.equals("true")) {
+            btnOn.setSelected(true);
+            btnOff.setSelected(false);
+        } else {
+            btnOn.setSelected(false);
+            btnOff.setSelected(true);
+        }
+    }
+    
+    private void setForm() {
         this.averyWeighTronix.getPorts();
         
         try {
@@ -62,6 +79,7 @@ public class FrmConfig extends javax.swing.JFrame {
             txtMinLengthQrCode.setText(config.getString("minLengthQrCode"));
             txtMinWeight.setText(config.getString("minStepWeight"));
             txtRefreshRate.setText(config.getString("refreshRate"));
+            setDebugging();
             txtDelayScan.setText(config.getString("delayScan"));
             txtDelayOk.setText(config.getString("delayOk"));
         } catch (Exception e) {
@@ -92,6 +110,9 @@ public class FrmConfig extends javax.swing.JFrame {
         txtKodeTimbangan = new javax.swing.JTextField();
         jScrollPane1 = new javax.swing.JScrollPane();
         txtAccessToken = new javax.swing.JTextArea();
+        jLabel14 = new javax.swing.JLabel();
+        btnOn = new javax.swing.JToggleButton();
+        btnOff = new javax.swing.JToggleButton();
         jPanel3 = new javax.swing.JPanel();
         jLabel3 = new javax.swing.JLabel();
         txtApiNilaiTimbangan = new javax.swing.JTextField();
@@ -146,6 +167,22 @@ public class FrmConfig extends javax.swing.JFrame {
         txtAccessToken.setRows(5);
         jScrollPane1.setViewportView(txtAccessToken);
 
+        jLabel14.setText("Debugging");
+
+        btnOn.setText("ON");
+        btnOn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnOnActionPerformed(evt);
+            }
+        });
+
+        btnOff.setText("OFF");
+        btnOff.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnOffActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
@@ -154,7 +191,7 @@ public class FrmConfig extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(cbComPort, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jScrollPane1)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 300, Short.MAX_VALUE)
                     .addComponent(txtTrackName)
                     .addComponent(jLabel1)
                     .addComponent(jLabel8)
@@ -162,8 +199,13 @@ public class FrmConfig extends javax.swing.JFrame {
                     .addComponent(jLabel7)
                     .addComponent(txtTitleAplikasi)
                     .addComponent(jLabel2)
-                    .addComponent(txtKodeTimbangan, javax.swing.GroupLayout.PREFERRED_SIZE, 300, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(txtKodeTimbangan)
+                    .addComponent(jLabel14)
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addComponent(btnOn)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(btnOff)))
+                .addContainerGap(12, Short.MAX_VALUE))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -188,6 +230,12 @@ public class FrmConfig extends javax.swing.JFrame {
                 .addComponent(jLabel2)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(txtKodeTimbangan, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jLabel14)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(btnOn)
+                    .addComponent(btnOff))
                 .addContainerGap())
         );
 
@@ -304,7 +352,7 @@ public class FrmConfig extends javax.swing.JFrame {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jSplitPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 370, Short.MAX_VALUE)
+                .addComponent(jSplitPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 370, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnCancel)
@@ -339,6 +387,7 @@ public class FrmConfig extends javax.swing.JFrame {
             newConfig.put("minLengthQrCode", txtMinLengthQrCode.getText());
             newConfig.put("minStepWeight", txtMinWeight.getText());
             newConfig.put("refreshRate", txtRefreshRate.getText());
+            newConfig.put("isDebugging", isDebugging);
             newConfig.put("delayScan", txtDelayScan.getText());
             newConfig.put("delayOk", txtDelayOk.getText());
         } catch (Exception e) {
@@ -351,6 +400,28 @@ public class FrmConfig extends javax.swing.JFrame {
         // TODO add your handling code here:
         this.setVisible(false);
     }//GEN-LAST:event_btnCancelActionPerformed
+
+    private void btnOnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnOnActionPerformed
+        // TODO add your handling code here:
+        if (btnOn.isSelected()) {
+            isDebugging = "true";
+            btnOff.setSelected(false);
+        } else if (!btnOn.isSelected()) {
+            isDebugging = "false";
+            btnOff.setSelected(true);
+        }
+    }//GEN-LAST:event_btnOnActionPerformed
+
+    private void btnOffActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnOffActionPerformed
+        // TODO add your handling code here:
+        if (btnOff.isSelected()) {
+            isDebugging = "false";
+            btnOn.setSelected(false);
+        } else if (!btnOff.isSelected()) {
+            isDebugging = "true";
+            btnOn.setSelected(true);
+        }
+    }//GEN-LAST:event_btnOffActionPerformed
 
     /**
      * @param args the command line arguments
@@ -389,13 +460,16 @@ public class FrmConfig extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnCancel;
+    private javax.swing.JToggleButton btnOff;
     private javax.swing.JButton btnOk;
+    private javax.swing.JToggleButton btnOn;
     public javax.swing.JComboBox<String> cbComPort;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel12;
     private javax.swing.JLabel jLabel13;
+    private javax.swing.JLabel jLabel14;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;

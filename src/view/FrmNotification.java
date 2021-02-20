@@ -198,13 +198,7 @@ public class FrmNotification extends javax.swing.JFrame {
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                try {
-                    new FrmNotification(true, new FrmMain()).setVisible(true);
-                } catch (JSONException ex) {
-                    Logger.getLogger(FrmNotification.class.getName()).log(Level.SEVERE, null, ex);
-                } catch (FileNotFoundException ex) {
-                    Logger.getLogger(FrmNotification.class.getName()).log(Level.SEVERE, null, ex);
-                }
+                new FrmNotification(true, new FrmMain()).setVisible(true);
             }
         });
     }

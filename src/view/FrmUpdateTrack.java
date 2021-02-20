@@ -58,6 +58,12 @@ public class FrmUpdateTrack extends javax.swing.JFrame {
                 if (counter < 0) {
                     params.put("qrcode", qrcode);
                     try {
+                        params.put("wb_id", frmMain.config.getString("kodeTimbangan"));
+                        params.put("track_name", frmMain.config.getString("trackName"));
+                    } catch (JSONException ex) {
+                        Logger.getLogger(FrmUpdateTrack.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                    try {
                         updateData();
                     } catch (Exception ex) {
                         Logger.getLogger(FrmUpdateTrack.class.getName()).log(Level.SEVERE, null, ex);
@@ -73,7 +79,9 @@ public class FrmUpdateTrack extends javax.swing.JFrame {
         btnCancel.setEnabled(false);
         txtUpdateData.setText("Updating...");
         result = "Status: " + frmMain.okHttpManager.sendPost(frmMain.config.get("apiUpdateTrack").toString(), params, frmMain.config.get("accessToken").toString());
-        System.out.println("Status : " + result);
+        if (frmMain.isDebugging.equals("true")) {
+            System.out.println("Status : " + result);
+        }
         new FrmNotification(true, frmMain).setVisible(true);
         this.setVisible(false);
     }

@@ -41,11 +41,10 @@ public class FrmPassword extends javax.swing.JFrame {
                 this.setVisible(false);
                 new FrmConfig().setVisible(true);
             } else {
+                txtPassword.setText("");
                 txtWarning.setText("Wrong password!");
             }
         } catch (FileNotFoundException ex) {
-            Logger.getLogger(FrmPassword.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (JSONException ex) {
             Logger.getLogger(FrmPassword.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
