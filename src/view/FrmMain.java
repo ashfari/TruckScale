@@ -15,6 +15,7 @@ import controller.PasswordManager;
 import java.awt.Color;
 import java.awt.KeyEventDispatcher;
 import java.awt.KeyboardFocusManager;
+import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 import java.io.FileNotFoundException;
 import java.util.logging.Level;
@@ -41,6 +42,7 @@ public class FrmMain extends javax.swing.JFrame {
     public String scannerInput = null;
     public Logger logger = null;
     public String isDebugging = "";
+    public String manualQrCode = "";
 
     /**
      * Creates new form FrmMain
@@ -48,6 +50,7 @@ public class FrmMain extends javax.swing.JFrame {
     public FrmMain() {
         initComponents();
         this.setLocationRelativeTo(null);
+        this.setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("locus.png")));
 
         createObjects();
 
@@ -71,6 +74,7 @@ public class FrmMain extends javax.swing.JFrame {
             this.currentWeight = new JSONObject();
             new PasswordManager().createPassword();
             globalKeyListener();
+            txtResultScan.setText("Ready...");
         } catch (JSONException ex) {
             Logger.getLogger(FrmMain.class.getName()).log(Level.SEVERE, null, ex);
         } catch (FileNotFoundException ex) {
@@ -80,17 +84,17 @@ public class FrmMain extends javax.swing.JFrame {
     
     public void globalKeyListener() {
         KeyboardFocusManager.getCurrentKeyboardFocusManager()
-                .addKeyEventDispatcher(new KeyEventDispatcher() {
-                    @Override
-                    public boolean dispatchKeyEvent(KeyEvent e) {
-                        if (e.getID() == KeyEvent.KEY_PRESSED) {
-                            if (e.getKeyCode() > 40 && e.getKeyCode() != 32) {
-                                scannerInput += e.getKeyChar() + "";
-                            }
+            .addKeyEventDispatcher(new KeyEventDispatcher() {
+                @Override
+                public boolean dispatchKeyEvent(KeyEvent e) {
+                    if (e.getID() == KeyEvent.KEY_PRESSED) {
+                        if (e.getKeyCode() > 40 && e.getKeyCode() != 32) {
+                            scannerInput += e.getKeyChar() + "";
                         }
-                        return false;
                     }
-                });
+                    return false;
+                }
+            });
     }
     
     public void resetResultScan() {
@@ -106,9 +110,12 @@ public class FrmMain extends javax.swing.JFrame {
         }
         if (isDebugging.equals("true")) {
             logger.setLevel(Level.INFO);
+            btn_qrcode.setVisible(true);
         } else {
             logger.setLevel(Level.OFF);
+            btn_qrcode.setVisible(false);
         }
+        
     }
     
     /**
@@ -136,12 +143,14 @@ public class FrmMain extends javax.swing.JFrame {
         weightUnit = new javax.swing.JLabel();
         jPanel2 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
+        last_sent = new javax.swing.JLabel();
         jPanel8 = new javax.swing.JPanel();
         jPanel4 = new javax.swing.JPanel();
         jScrollPane2 = new javax.swing.JScrollPane();
         txtResultScan = new javax.swing.JTextArea();
         jLabel2 = new javax.swing.JLabel();
         jSeparator1 = new javax.swing.JSeparator();
+        btn_qrcode = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setMinimumSize(new java.awt.Dimension(800, 519));
@@ -238,7 +247,7 @@ public class FrmMain extends javax.swing.JFrame {
             jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel6Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(weightValue, javax.swing.GroupLayout.DEFAULT_SIZE, 262, Short.MAX_VALUE)
+                .addComponent(weightValue, javax.swing.GroupLayout.DEFAULT_SIZE, 264, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(weightUnit, javax.swing.GroupLayout.PREFERRED_SIZE, 75, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
@@ -262,13 +271,17 @@ public class FrmMain extends javax.swing.JFrame {
         jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabel1.setText("WEIGHT");
 
+        last_sent.setText("Last sent : -");
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, 347, Short.MAX_VALUE)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, 349, Short.MAX_VALUE)
+                    .addComponent(last_sent, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
@@ -276,7 +289,9 @@ public class FrmMain extends javax.swing.JFrame {
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(jLabel1)
-                .addContainerGap(124, Short.MAX_VALUE))
+                .addGap(99, 99, 99)
+                .addComponent(last_sent, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap())
         );
 
         javax.swing.GroupLayout jPanel7Layout = new javax.swing.GroupLayout(jPanel7);
@@ -286,8 +301,8 @@ public class FrmMain extends javax.swing.JFrame {
             .addGroup(jPanel7Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jPanel6, javax.swing.GroupLayout.DEFAULT_SIZE, 367, Short.MAX_VALUE)
-                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, 367, Short.MAX_VALUE))
+                    .addComponent(jPanel6, javax.swing.GroupLayout.DEFAULT_SIZE, 369, Short.MAX_VALUE)
+                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, 369, Short.MAX_VALUE))
                 .addContainerGap())
         );
         jPanel7Layout.setVerticalGroup(
@@ -362,6 +377,14 @@ public class FrmMain extends javax.swing.JFrame {
 
         jSplitPane1.setRightComponent(jPanel8);
 
+        btn_qrcode.setText("QrCode");
+        btn_qrcode.setToolTipText("");
+        btn_qrcode.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btn_qrcodeActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -371,6 +394,8 @@ public class FrmMain extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(btn_qrcode)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jButton1)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(exit))
@@ -385,7 +410,8 @@ public class FrmMain extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jButton1)
-                    .addComponent(exit))
+                    .addComponent(exit)
+                    .addComponent(btn_qrcode))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -406,6 +432,11 @@ public class FrmMain extends javax.swing.JFrame {
         // TODO add your handling code here:
         System.exit(0);
     }//GEN-LAST:event_exitActionPerformed
+
+    private void btn_qrcodeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_qrcodeActionPerformed
+        // TODO add your handling code here:
+        new FrmQrCode(this).setVisible(true);
+    }//GEN-LAST:event_btn_qrcodeActionPerformed
 
     /**
      * @param args the command line arguments
@@ -445,6 +476,7 @@ public class FrmMain extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btn_qrcode;
     public javax.swing.JLabel date_time_counter;
     public javax.swing.JLabel dotLabel;
     private javax.swing.JButton exit;
@@ -462,6 +494,7 @@ public class FrmMain extends javax.swing.JFrame {
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JSplitPane jSplitPane1;
+    public javax.swing.JLabel last_sent;
     public javax.swing.JLabel main_title;
     public javax.swing.JLabel refreshRateLabel;
     public javax.swing.JTextArea txtResultScan;

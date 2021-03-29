@@ -5,19 +5,14 @@
  */
 package controller;
 
-import controller.ApiManager;
-import controller.AveryWeighTronix;
-import controller.OkHttpManager;
 import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import okhttp3.Response;
 import org.json.JSONException;
+import org.json.JSONObject;
 import view.FrmMain;
 
 /**
@@ -32,11 +27,11 @@ public class ThreadWeight extends Thread {
     Date date = new Date();
     FrmMain frmMain = null;
     AveryWeighTronix averyWeighTronix = null;
-    String apiResponse = "";
+    Response apiResponse = null;
     int refreshRateConfig = 0;
     int refreshRate = 0;
     SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
-    Map params = null;
+    JSONObject params = null;
 
     public ThreadWeight(FrmMain frmMain) throws JSONException, FileNotFoundException {
         this.frmMain = frmMain;
@@ -45,7 +40,7 @@ public class ThreadWeight extends Thread {
     
     private void createObjects() throws JSONException, FileNotFoundException {
         this.averyWeighTronix = new AveryWeighTronix(frmMain);
-        this.params = new LinkedHashMap<>();
+        this.params = new JSONObject();
     }
     
     private String capitalize(String str) {
@@ -56,7 +51,7 @@ public class ThreadWeight extends Thread {
         isRunning = true;
         try {
             while (isRunning) {
-                //                Show Date
+//                Show Date
                 date = new Date();
                 frmMain.date_time_counter.setText(formatter.format(date));
                 
@@ -72,17 +67,42 @@ public class ThreadWeight extends Thread {
                 if (refreshRate >= refreshRateConfig) {
                     frmMain.dotLabel.setEnabled(true);
                     
+                    averyWeighTronix.getWeight();
+
+                    if (frmMain.isDebugging.equals("true")) {
+                        System.out.println("current weight : " + frmMain.currentWeight.toString());
+                    }
+                    
                     try {
-                        if ((Double.parseDouble(frmMain.currentWeight.get("value").toString())
+                        if (((Double.parseDouble(frmMain.currentWeight.get("value").toString())
                                 - Double.parseDouble(frmMain.weightValue.getText().toString())) 
-                                > Double.parseDouble(frmMain.config.get("minStepWeight").toString())) {
-                            frmMain.weightValue.setText(frmMain.currentWeight.get("value").toString());
-                            frmMain.weightUnit.setText(capitalize(frmMain.currentWeight.get("unit").toString()));
+                                > Double.parseDouble(frmMain.config.get("minStepWeight").toString()))
+                                ||
+                                ((Double.parseDouble(frmMain.weightValue.getText().toString())
+                                - Double.parseDouble(frmMain.currentWeight.get("value").toString())) 
+                                > Double.parseDouble(frmMain.config.get("minStepWeight").toString()))) {
+                            
                             params.put("weigh_bridge_id", frmMain.config.get("kodeTimbangan"));
                             params.put("value_in_kg", Double.parseDouble(frmMain.weightValue.getText()));
                             apiResponse = frmMain.okHttpManager.sendPost(frmMain.config.get("apiTimbangan").toString(), params, null);
-                            System.out.println(apiResponse);
+                            frmMain.last_sent.setText("Last sent : "
+                                    + frmMain.currentWeight.get("value").toString()
+                                    + " "
+                                    + capitalize(frmMain.currentWeight.get("unit").toString())
+                                    + " ~ "
+                                    + formatter.format(date));
+                            if (frmMain.isDebugging.equals("true")) {
+                                System.out.println("send to : " + frmMain.config.get("apiTimbangan").toString());
+                                System.out.println("params : " + params);
+                                System.out.println("api response : " + apiResponse.body().string());
+                            }
                         }
+                        if (Integer.parseInt(frmMain.currentWeight.get("value").toString()) == 0) {
+                            frmMain.weightValue.setText("0");
+                        } else {
+                            frmMain.weightValue.setText(frmMain.currentWeight.get("value").toString());
+                        }
+                        frmMain.weightUnit.setText(capitalize(frmMain.currentWeight.get("unit").toString()));
                     } catch (JSONException ex) {
 //                        Logger.getLogger(ThreadWeight.class.getName()).log(Level.SEVERE, null, ex);
                     } catch (Exception ex) {
@@ -94,6 +114,9 @@ public class ThreadWeight extends Thread {
                 Thread.sleep(1000);
             }
         } catch (InterruptedException e) {
+        } catch (JSONException ex) {
+//            Logger.getLogger(ThreadWeight.class.getName()).log(Level.SEVERE, null, ex);
+            System.out.println("no port configured");
         }
     }
 

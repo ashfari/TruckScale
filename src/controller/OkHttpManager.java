@@ -8,6 +8,8 @@ package controller;
 import java.util.Iterator;
 import java.util.Map;
 import okhttp3.*;
+import okio.ByteString;
+import org.json.JSONObject;
 
 /**
  *
@@ -17,36 +19,26 @@ public class OkHttpManager {
     
     // one instance, reuse
     private final OkHttpClient httpClient = new OkHttpClient();
-    String value = "";
     
-    public String sendPost(String api, Map params, String token) throws Exception {
-        // form parameters
-        FormBody.Builder formBuilder = new FormBody.Builder();
+    public Response sendPost(String api, JSONObject json, String token) throws Exception {
+        MediaType JSON = MediaType.parse("application/json; charset=utf-8");
         
-        for (Iterator it = params.entrySet().iterator(); it.hasNext();) {
-            Map.Entry param = (Map.Entry) it.next();
-            formBuilder.add(param.getKey().toString(), param.getValue().toString());
-        }
+        RequestBody formBody = RequestBody.create(JSON, String.valueOf(json));
         
-        RequestBody formBody = formBuilder.build();
-
         Request.Builder requestBuilder = new Request.Builder()
                 .url(api)
                 .addHeader("User-Agent", "OkHttp Bot")
                 .addHeader("Content-Type", "application/json")
-                .addHeader("Accept", "application/json")
-                .post(formBody);
+                .addHeader("Accept", "application/json");
         
         if (token != null) {
             requestBuilder.addHeader("Authorization", "Bearer " + token);
         }
         
-        Request request = requestBuilder.build();
-
-        try (Response response = httpClient.newCall(request).execute()) {
-            value = response.body().string();
-        }
+        requestBuilder.post(formBody);
         
-        return value;
+        Request request = requestBuilder.build();
+        
+        return httpClient.newCall(request).execute();
     }
 }

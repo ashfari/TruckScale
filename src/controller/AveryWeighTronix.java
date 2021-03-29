@@ -57,7 +57,11 @@ public class AveryWeighTronix {
             @Override
             public void serialEvent(SerialPortEvent event) {
                 byte[] newData = event.getReceivedData();
-
+                
+                if (window.isDebugging.equals("true")) {
+                    System.out.println("data from port : " + newData);
+                }
+                
                 for (int i = 0; i < newData.length; ++i) {
                     if (newData[i] == 2) {
                         message = "";

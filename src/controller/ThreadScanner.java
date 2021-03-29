@@ -8,12 +8,13 @@ package controller;
 import java.awt.Color;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import okhttp3.Response;
 import org.json.JSONException;
 import org.json.JSONObject;
 import view.FrmMain;
@@ -28,7 +29,7 @@ public class ThreadScanner extends Thread {
     private Thread t;
     private String threadName = "Thread Scanner";
     private boolean isRunning;
-    Map scannerParams = null;
+    JSONObject scannerParams = null;
     boolean isReading = false;
     int sleepTime = 0;
     int delay = 0;
@@ -38,7 +39,7 @@ public class ThreadScanner extends Thread {
     BufferedReader bufferedReader = null;
     String input = "";
     String prevInput = "";
-    String result = "";
+    Response result = null;
     JSONObject resultJson = null;
     JSONObject jsonArray = null;
     JSONObject jsonTruck = null;
@@ -53,7 +54,7 @@ public class ThreadScanner extends Thread {
     private void createObjects() {
         scanner = new Scanner(System.in);
         bufferedReader = new BufferedReader(new InputStreamReader(System.in));
-        this.scannerParams = new LinkedHashMap<>();
+        this.scannerParams = new JSONObject();
         sleepTime = 100;
         resetDelay();
         resetDelayNoScan();
@@ -69,10 +70,14 @@ public class ThreadScanner extends Thread {
         } catch (JSONException ex) {
             Logger.getLogger(ThreadScanner.class.getName()).log(Level.SEVERE, null, ex);
         }
-        try {
-            frmMain.averyWeighTronix.getWeight();
-        } catch (Exception e) {
-        }
+//        try {
+//            frmMain.averyWeighTronix.getWeight();
+//            if (frmMain.isDebugging.equals("true")) {
+//                System.out.println("get weight from avery weight tronix");
+//            }
+//        } catch (JSONException ex) {
+//            Logger.getLogger(ThreadScanner.class.getName()).log(Level.SEVERE, null, ex);
+//        }
     }
     
     private void resetDelay() {
@@ -94,8 +99,13 @@ public class ThreadScanner extends Thread {
                 frmMain.config = frmMain.configManager.readConfig();
                 implementConfig();
                 
+                if (frmMain.isDebugging.equals("true") && frmMain.manualQrCode.length() > 0) {
+                    frmMain.scannerInput = frmMain.manualQrCode;
+                }
+
                 input =  frmMain.scannerInput;
-                if (frmMain.config.getString("isDebugging").equals("true")) {
+                
+                if (frmMain.isDebugging.equals("true") && input.length() > 0) {
                     System.out.println(input);
                 }
                 
@@ -110,10 +120,13 @@ public class ThreadScanner extends Thread {
                     }
                     if (delay <= 0) {
                         scannerParams.put("qrcode", input);
+                        scannerParams.put("wb_id", frmMain.config.getString("kodeTimbangan"));
+                        scannerParams.put("track_name", frmMain.config.getString("trackName"));
                         try {
                             result = frmMain.okHttpManager.sendPost(frmMain.config.get("apiQrCode").toString(), scannerParams, frmMain.config.get("accessToken").toString());
                             showResult(result);
                             frmMain.scannerInput = "";
+                            frmMain.manualQrCode = "";
                             resetDelay();
                         } catch (Exception ex) {
                             Logger.getLogger(ThreadScanner.class.getName()).log(Level.SEVERE, null, ex);
@@ -150,10 +163,10 @@ public class ThreadScanner extends Thread {
         }
     }
     
-    public void showResult(String result) throws JSONException {
-        resultJson = new JSONObject(result);
+    public void showResult(Response result) throws IOException, JSONException {
+        resultJson = new JSONObject(result.body().string());
         
-        try {
+        if (result.isSuccessful()) {
             frmMain.txtResultScan.setText("Success: QR Code Valid");
             frmMain.txtResultScan.append("\n\n");
             frmMain.txtResultScan.append("SO Number: " + resultJson.get("so_number").toString());
@@ -170,7 +183,7 @@ public class ThreadScanner extends Thread {
 
             new FrmUpdateTrack(input, frmMain).setVisible(true);
             
-        } catch (Exception e) {
+        } else {
             frmMain.txtResultScan.setForeground(Color.RED);
             frmMain.txtResultScan.setText("Gagal: QR Code tidak valid (" + resultJson.get("message").toString() + ")");
         }

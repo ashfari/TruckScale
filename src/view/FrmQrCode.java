@@ -5,70 +5,23 @@
  */
 package view;
 
-import java.awt.Color;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import org.json.JSONException;
-
 /**
  *
  * @author Sahab
  */
-public class FrmNotification extends javax.swing.JFrame {
+public class FrmQrCode extends javax.swing.JFrame {
 
     FrmMain frmMain = null;
-    Timer timer = null;
-    int counter = 0;
-    
     /**
-     * Creates new form FrmUpdateTrack
+     * Creates new form FrmQrCode
      */
-    public FrmNotification(boolean isSuccess, FrmMain frmMain) {
+    public FrmQrCode(FrmMain frmMain) {
         this.setUndecorated(true);
         initComponents();
         this.setLocationRelativeTo(null);
         
         this.frmMain = frmMain;
-        createObjects(isSuccess);
-        
-        showNotification();
-    }
-    
-    public void createObjects(boolean isSuccess) {
-        timer = new Timer();
-        try {
-            counter = Integer.parseInt(frmMain.config.getString("delayOk"));
-        } catch (JSONException ex) {
-            Logger.getLogger(FrmNotification.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        if (isSuccess) {
-            txtStatus.setForeground(new Color(0, 204, 51));
-            txtStatus.setText("Berhasil! Silahkan lanjutkan proses selanjutnya.");
-        } else {
-            txtStatus.setForeground(Color.RED);
-            txtStatus.setText("Gagal! Silahkan ulangi proses scan.");
-        }
-    }
-    
-    public void showNotification() {
-        timer.scheduleAtFixedRate(new TimerTask() {
-            @Override
-            public void run() {
-                btnOk.setText("OK (" + counter + ")");
-                counter--;
-                if (counter < 0) {
-                    timeout();
-                }
-            }
-        }, 0, 1000);
-    }
-    
-    private void timeout() {
-        frmMain.resetResultScan();
-        timer.cancel();
-        this.setVisible(false);
+        input_qrcode.setText(frmMain.manualQrCode);
     }
 
     /**
@@ -81,16 +34,18 @@ public class FrmNotification extends javax.swing.JFrame {
     private void initComponents() {
 
         jPanel1 = new javax.swing.JPanel();
-        txtStatus = new javax.swing.JLabel();
-        btnOk = new javax.swing.JButton();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        input_qrcode = new javax.swing.JTextArea();
+        jButton1 = new javax.swing.JButton();
+        jButton2 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
         jPanel1.setBackground(new java.awt.Color(255, 255, 255));
 
-        txtStatus.setFont(new java.awt.Font("Arial", 1, 12)); // NOI18N
-        txtStatus.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        txtStatus.setText("Status");
+        input_qrcode.setColumns(20);
+        input_qrcode.setRows(5);
+        jScrollPane1.setViewportView(input_qrcode);
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -98,21 +53,28 @@ public class FrmNotification extends javax.swing.JFrame {
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(txtStatus, javax.swing.GroupLayout.DEFAULT_SIZE, 360, Short.MAX_VALUE)
+                .addComponent(jScrollPane1)
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(txtStatus)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
-        btnOk.setText("OK");
-        btnOk.addActionListener(new java.awt.event.ActionListener() {
+        jButton1.setText("OK");
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnOkActionPerformed(evt);
+                jButton1ActionPerformed(evt);
+            }
+        });
+
+        jButton2.setText("Cancel");
+        jButton2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton2ActionPerformed(evt);
             }
         });
 
@@ -125,9 +87,11 @@ public class FrmNotification extends javax.swing.JFrame {
                 .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(btnOk, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(162, 162, 162))
+                .addContainerGap(143, Short.MAX_VALUE)
+                .addComponent(jButton1)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jButton2)
+                .addGap(139, 139, 139))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -135,18 +99,25 @@ public class FrmNotification extends javax.swing.JFrame {
                 .addContainerGap()
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(btnOk)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jButton1)
+                    .addComponent(jButton2))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void btnOkActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnOkActionPerformed
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         // TODO add your handling code here:
-        counter = 0;
-        timeout();
-    }//GEN-LAST:event_btnOkActionPerformed
+        frmMain.manualQrCode = input_qrcode.getText();
+        this.setVisible(false);
+    }//GEN-LAST:event_jButton1ActionPerformed
+
+    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+        // TODO add your handling code here:
+        this.setVisible(false);
+    }//GEN-LAST:event_jButton2ActionPerformed
 
     /**
      * @param args the command line arguments
@@ -165,28 +136,29 @@ public class FrmNotification extends javax.swing.JFrame {
                 }
             }
         } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(FrmNotification.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(FrmQrCode.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(FrmNotification.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(FrmQrCode.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(FrmNotification.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(FrmQrCode.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(FrmNotification.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(FrmQrCode.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
-        //</editor-fold>
         //</editor-fold>
 
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new FrmNotification(true, new FrmMain()).setVisible(true);
+                new FrmMain().setVisible(true);
             }
         });
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton btnOk;
+    private javax.swing.JTextArea input_qrcode;
+    private javax.swing.JButton jButton1;
+    private javax.swing.JButton jButton2;
     private javax.swing.JPanel jPanel1;
-    private javax.swing.JLabel txtStatus;
+    private javax.swing.JScrollPane jScrollPane1;
     // End of variables declaration//GEN-END:variables
 }

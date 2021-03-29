@@ -51,7 +51,7 @@ public class ConfigManager {
         config.put("kodeTimbangan", "1");
         config.put("trackName", "weigh-in");
         config.put("accessToken", "");
-        config.put("apiTimbangan", "http://localhost:8000/api/v1/weigh-bridge/scans");
+        config.put("apiTimbangan", "http://localhost:8000/api/weigh-bridge/scans");
         config.put("apiQrCode", "http://localhost:8000/api/customer/v1/orders/scan");
         config.put("apiUpdateTrack", "http://localhost:8000/api/customer/v1/orders/tracks");
         config.put("minLengthQrCode", "100");

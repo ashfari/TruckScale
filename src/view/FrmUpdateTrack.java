@@ -12,7 +12,10 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import okhttp3.Response;
+import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  *
@@ -23,9 +26,10 @@ public class FrmUpdateTrack extends javax.swing.JFrame {
     FrmMain frmMain = null;
     Timer timer = null;
     int counter = 0;
-    Map params = null;
-    String result = null;
+    JSONObject params = null;
+    Response result = null;
     String qrcode = null;
+    JSONArray data = null;
     
     /**
      * Creates new form FrmUpdateTrack
@@ -44,25 +48,19 @@ public class FrmUpdateTrack extends javax.swing.JFrame {
     
     public void createObjects() throws JSONException, FileNotFoundException {
         timer = new Timer();
-        this.params = new LinkedHashMap<>();
+        this.params = new JSONObject();
+        this.data = new JSONArray();
         counter = Integer.parseInt(frmMain.config.getString("delayOk"));
-        result = "";
     }
     
     public void sendUpdateTrack() {
         timer.scheduleAtFixedRate(new TimerTask() {
+            Map params = new LinkedHashMap<>();
             @Override
             public void run() {
                 btnOk.setText("OK (" + counter + ")");
                 counter--;
                 if (counter < 0) {
-                    params.put("qrcode", qrcode);
-                    try {
-                        params.put("wb_id", frmMain.config.getString("kodeTimbangan"));
-                        params.put("track_name", frmMain.config.getString("trackName"));
-                    } catch (JSONException ex) {
-                        Logger.getLogger(FrmUpdateTrack.class.getName()).log(Level.SEVERE, null, ex);
-                    }
                     try {
                         updateData();
                     } catch (Exception ex) {
@@ -77,12 +75,25 @@ public class FrmUpdateTrack extends javax.swing.JFrame {
         timer.cancel();
         btnOk.setEnabled(false);
         btnCancel.setEnabled(false);
-        txtUpdateData.setText("Updating...");
-        result = "Status: " + frmMain.okHttpManager.sendPost(frmMain.config.get("apiUpdateTrack").toString(), params, frmMain.config.get("accessToken").toString());
-        if (frmMain.isDebugging.equals("true")) {
-            System.out.println("Status : " + result);
+        params.put("qrcode", qrcode);
+        try {
+            params.put("wb_id", frmMain.config.getString("kodeTimbangan"));
+            params.put("track_name", frmMain.config.getString("trackName"));
+            data.put(Double.parseDouble(frmMain.weightValue.getText()));
+            data.put(frmMain.weightUnit.getText().toLowerCase());
+            params.put("data", data);
+        } catch (JSONException ex) {
+            Logger.getLogger(FrmUpdateTrack.class.getName()).log(Level.SEVERE, null, ex);
         }
-        new FrmNotification(true, frmMain).setVisible(true);
+        txtUpdateData.setText("Updating...");
+        System.out.println("update track qrcode : " + qrcode);
+        System.out.println("qrcode : " + params.get("qrcode").toString());
+        result = frmMain.okHttpManager.sendPost(frmMain.config.get("apiUpdateTrack").toString(), params, frmMain.config.get("accessToken").toString());
+        if (frmMain.isDebugging.equals("true")) {
+            System.out.println("Status : " + result.isSuccessful());
+            System.out.println("Return value : " + result.body().string());
+        }
+        new FrmNotification(result.isSuccessful(), frmMain).setVisible(true);
         this.setVisible(false);
     }
 
