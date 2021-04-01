@@ -8,20 +8,29 @@ package view;
 import controller.ThreadWeight;
 import controller.ThreadScanner;
 import controller.ApiManager;
+import controller.AuthManager;
 import controller.AveryWeighTronix;
 import controller.ConfigManager;
 import controller.OkHttpManager;
 import controller.PasswordManager;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.KeyEventDispatcher;
 import java.awt.KeyboardFocusManager;
+import java.awt.Point;
 import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.io.FileNotFoundException;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JPopupMenu;
 import javax.swing.UIManager;
+import okhttp3.Response;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -43,6 +52,10 @@ public class FrmMain extends javax.swing.JFrame {
     public Logger logger = null;
     public String isDebugging = "";
     public String manualQrCode = "";
+    public JSONObject auth = null;
+    AuthManager authManager = null;
+    Response result = null;
+    JPopupMenu menu;
 
     /**
      * Creates new form FrmMain
@@ -53,12 +66,15 @@ public class FrmMain extends javax.swing.JFrame {
         this.setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("locus.png")));
 
         createObjects();
+        
+        this.auth = auth;
 
         threadScanner.start();
         threadWeight.start();
     }
     
     public void createObjects() {
+        createUserPopUp();
         try {
             this.configManager = new ConfigManager();
             this.config = new JSONObject();
@@ -75,11 +91,57 @@ public class FrmMain extends javax.swing.JFrame {
             new PasswordManager().createPassword();
             globalKeyListener();
             txtResultScan.setText("Ready...");
+            this.auth = new JSONObject();
+            this.authManager = new AuthManager();
+            this.result = this.okHttpManager.sendGetAccountInfo(config.getString("apiAccountInfo"), this.authManager.readAuth());
+            if (this.result.isSuccessful()) {
+                this.auth = new JSONObject(result.body().string());
+                btnUser.setText(this.auth.getString("name"));
+            } else {
+                this.setVisible(false);
+                new FrmLogin().setVisible(true);
+            }
         } catch (JSONException ex) {
             Logger.getLogger(FrmMain.class.getName()).log(Level.SEVERE, null, ex);
         } catch (FileNotFoundException ex) {
             Logger.getLogger(FrmMain.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (Exception ex) {
+            Logger.getLogger(FrmMain.class.getName()).log(Level.SEVERE, null, ex);
         }
+    }
+    
+    private void createUserPopUp() {
+        // Create a JPopupMenu
+        menu=new JPopupMenu();
+        
+        // Create JMenuItems
+        menuItemLogout.setText("Logout");
+        
+        // Add JMenuItems to JPopupMenu
+        menu.add(menuItemLogout);
+    }
+    
+    // This method does it all!
+    private void showPopup(ActionEvent ae)
+    {
+        // Get the event source
+        Component b=(Component)ae.getSource();
+        
+        // Get the location of the point 'on the screen'
+        Point p=b.getLocationOnScreen();
+        
+        // Show the JPopupMenu via program
+        
+        // Parameter desc
+        // ----------------
+        // this - represents current frame
+        // 0,0 is the co ordinate where the popup
+        // is shown
+        menu.show(this,0,0);
+        
+        // Now set the location of the JPopupMenu
+        // This location is relative to the screen
+        menu.setLocation(p.x,p.y+b.getHeight());
     }
     
     public void globalKeyListener() {
@@ -115,7 +177,6 @@ public class FrmMain extends javax.swing.JFrame {
             logger.setLevel(Level.OFF);
             btn_qrcode.setVisible(false);
         }
-        
     }
     
     /**
@@ -127,6 +188,7 @@ public class FrmMain extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        menuItemLogout = new javax.swing.JMenuItem();
         jPanel1 = new javax.swing.JPanel();
         main_title = new javax.swing.JLabel();
         jButton1 = new javax.swing.JButton();
@@ -151,6 +213,14 @@ public class FrmMain extends javax.swing.JFrame {
         jLabel2 = new javax.swing.JLabel();
         jSeparator1 = new javax.swing.JSeparator();
         btn_qrcode = new javax.swing.JButton();
+        btnUser = new javax.swing.JButton();
+
+        menuItemLogout.setText("jMenuItem1");
+        menuItemLogout.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                menuItemLogoutActionPerformed(evt);
+            }
+        });
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setMinimumSize(new java.awt.Dimension(800, 519));
@@ -309,9 +379,9 @@ public class FrmMain extends javax.swing.JFrame {
             jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel7Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jPanel6, javax.swing.GroupLayout.DEFAULT_SIZE, 121, Short.MAX_VALUE)
+                .addComponent(jPanel6, javax.swing.GroupLayout.DEFAULT_SIZE, 133, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, 199, Short.MAX_VALUE)
+                .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, 207, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
@@ -385,6 +455,13 @@ public class FrmMain extends javax.swing.JFrame {
             }
         });
 
+        btnUser.setText("User");
+        btnUser.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnUserActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -392,16 +469,18 @@ public class FrmMain extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jPanel3, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jSplitPane1, javax.swing.GroupLayout.Alignment.TRAILING)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addGap(0, 0, Short.MAX_VALUE)
                         .addComponent(btn_qrcode)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jButton1)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(exit))
-                    .addComponent(jPanel3, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jSplitPane1, javax.swing.GroupLayout.Alignment.TRAILING))
+                        .addComponent(exit)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(btnUser)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -411,7 +490,8 @@ public class FrmMain extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jButton1)
                     .addComponent(exit)
-                    .addComponent(btn_qrcode))
+                    .addComponent(btn_qrcode)
+                    .addComponent(btnUser))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -437,6 +517,20 @@ public class FrmMain extends javax.swing.JFrame {
         // TODO add your handling code here:
         new FrmQrCode(this).setVisible(true);
     }//GEN-LAST:event_btn_qrcodeActionPerformed
+
+    private void btnUserActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUserActionPerformed
+        showPopup(evt);
+    }//GEN-LAST:event_btnUserActionPerformed
+
+    private void menuItemLogoutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuItemLogoutActionPerformed
+        if (this.authManager.deleteAuth()) {
+            this.setVisible(false);
+            JOptionPane.showMessageDialog(this, "Logout success!", "Logout", JOptionPane.INFORMATION_MESSAGE);
+            new FrmLogin().setVisible(true);
+        } else {
+            JOptionPane.showMessageDialog(this, "Logout failed!", "Logout", JOptionPane.ERROR_MESSAGE);
+        }
+    }//GEN-LAST:event_menuItemLogoutActionPerformed
 
     /**
      * @param args the command line arguments
@@ -476,6 +570,7 @@ public class FrmMain extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnUser;
     private javax.swing.JButton btn_qrcode;
     public javax.swing.JLabel date_time_counter;
     public javax.swing.JLabel dotLabel;
@@ -496,6 +591,7 @@ public class FrmMain extends javax.swing.JFrame {
     private javax.swing.JSplitPane jSplitPane1;
     public javax.swing.JLabel last_sent;
     public javax.swing.JLabel main_title;
+    private javax.swing.JMenuItem menuItemLogout;
     public javax.swing.JLabel refreshRateLabel;
     public javax.swing.JTextArea txtResultScan;
     public javax.swing.JLabel weightUnit;

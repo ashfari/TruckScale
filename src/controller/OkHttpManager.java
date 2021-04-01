@@ -6,9 +6,8 @@
 package controller;
 
 import java.util.Iterator;
-import java.util.Map;
+import java.util.stream.Collectors;
 import okhttp3.*;
-import okio.ByteString;
 import org.json.JSONObject;
 
 /**
@@ -36,6 +35,45 @@ public class OkHttpManager {
         }
         
         requestBuilder.post(formBody);
+        
+        Request request = requestBuilder.build();
+        
+        return httpClient.newCall(request).execute();
+    }
+    
+    public Response sendPostTokenRequest(String api, JSONObject json) throws Exception {
+        FormBody.Builder formBuilder = new FormBody.Builder();
+        
+        Iterator<String> keys = json.keys();
+
+        while(keys.hasNext()) {
+            String key = keys.next();
+            formBuilder.add(key, json.getString(key));
+        }
+        
+        RequestBody formBody = formBuilder.build();
+        
+        Request.Builder requestBuilder = new Request.Builder()
+                .url(api)
+                .addHeader("User-Agent", "OkHttp Bot")
+                .addHeader("Content-Type", "application/x-www-form-urlencoded");
+        
+        requestBuilder.post(formBody);
+        
+        Request request = requestBuilder.build();
+        
+        return httpClient.newCall(request).execute();
+    }
+    
+    public Response sendGetAccountInfo(String api, String token) throws Exception {
+        Request.Builder requestBuilder = new Request.Builder()
+                .url(api)
+                .addHeader("User-Agent", "OkHttp Bot")
+                .addHeader("Accept", "application/json");
+        
+        if (token != null) {
+            requestBuilder.addHeader("Authorization", "Bearer " + token);
+        }
         
         Request request = requestBuilder.build();
         

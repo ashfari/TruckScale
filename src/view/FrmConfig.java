@@ -82,6 +82,10 @@ public class FrmConfig extends javax.swing.JFrame {
             setDebugging();
             txtDelayScan.setText(config.getString("delayScan"));
             txtDelayOk.setText(config.getString("delayOk"));
+            txtClientId.setText(config.getString("clientId") != null ? config.getString("clientId") : "");
+            txtClientSecret.setText(config.getString("clientSecret") != null ? config.getString("clientSecret") : "");
+            txtApiRequestToken.setText(config.getString("apiRequestToken") != null ? config.getString("apiRequestToken") : "");
+            txtApiAccountInfo.setText(config.getString("apiAccountInfo") != null ? config.getString("apiAccountInfo") : "");
         } catch (Exception e) {
         }
     }
@@ -113,6 +117,10 @@ public class FrmConfig extends javax.swing.JFrame {
         jLabel14 = new javax.swing.JLabel();
         btnOn = new javax.swing.JToggleButton();
         btnOff = new javax.swing.JToggleButton();
+        jLabel15 = new javax.swing.JLabel();
+        txtClientId = new javax.swing.JTextField();
+        jLabel16 = new javax.swing.JLabel();
+        txtClientSecret = new javax.swing.JTextField();
         jPanel3 = new javax.swing.JPanel();
         jLabel3 = new javax.swing.JLabel();
         txtApiNilaiTimbangan = new javax.swing.JTextField();
@@ -130,6 +138,10 @@ public class FrmConfig extends javax.swing.JFrame {
         txtDelayScan = new javax.swing.JTextField();
         jLabel13 = new javax.swing.JLabel();
         txtDelayOk = new javax.swing.JTextField();
+        jLabel17 = new javax.swing.JLabel();
+        txtApiRequestToken = new javax.swing.JTextField();
+        jLabel18 = new javax.swing.JLabel();
+        txtApiAccountInfo = new javax.swing.JTextField();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setMinimumSize(new java.awt.Dimension(400, 300));
@@ -183,6 +195,10 @@ public class FrmConfig extends javax.swing.JFrame {
             }
         });
 
+        jLabel15.setText("Client ID");
+
+        jLabel16.setText("Client Secret");
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
@@ -204,7 +220,11 @@ public class FrmConfig extends javax.swing.JFrame {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(btnOff))
                     .addComponent(cbComPort, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(txtKodeTimbangan))
+                    .addComponent(txtKodeTimbangan)
+                    .addComponent(jLabel15)
+                    .addComponent(txtClientId)
+                    .addComponent(jLabel16)
+                    .addComponent(txtClientSecret))
                 .addContainerGap(12, Short.MAX_VALUE))
         );
         jPanel2Layout.setVerticalGroup(
@@ -236,6 +256,14 @@ public class FrmConfig extends javax.swing.JFrame {
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnOn)
                     .addComponent(btnOff))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jLabel15)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(txtClientId, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jLabel16)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(txtClientSecret, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
 
@@ -259,6 +287,10 @@ public class FrmConfig extends javax.swing.JFrame {
 
         jLabel13.setText("Delay OK (detik)");
 
+        jLabel17.setText("URL API Request Token");
+
+        jLabel18.setText("URL API Login");
+
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
         jPanel3Layout.setHorizontalGroup(
@@ -266,30 +298,38 @@ public class FrmConfig extends javax.swing.JFrame {
             .addGroup(jPanel3Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel3Layout.createSequentialGroup()
-                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(txtRefreshRate, javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(txtMinWeight)
-                            .addComponent(txtApiQrCode)
-                            .addComponent(txtApiNilaiTimbangan)
-                            .addComponent(jLabel3)
-                            .addComponent(jLabel4)
-                            .addComponent(jLabel5)
-                            .addComponent(jLabel6)
-                            .addComponent(jLabel10)
-                            .addComponent(txtMinLengthQrCode)
-                            .addComponent(jLabel11)
-                            .addComponent(txtApiUpdateTrack, javax.swing.GroupLayout.PREFERRED_SIZE, 300, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addComponent(txtApiRequestToken)
+                    .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(jPanel3Layout.createSequentialGroup()
+                            .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                .addComponent(txtRefreshRate, javax.swing.GroupLayout.Alignment.TRAILING)
+                                .addComponent(txtMinWeight)
+                                .addComponent(txtApiQrCode)
+                                .addComponent(txtApiNilaiTimbangan)
+                                .addComponent(jLabel3)
+                                .addComponent(jLabel4)
+                                .addComponent(jLabel5)
+                                .addComponent(jLabel6)
+                                .addComponent(jLabel10)
+                                .addComponent(txtMinLengthQrCode)
+                                .addComponent(jLabel11)
+                                .addComponent(txtApiUpdateTrack, javax.swing.GroupLayout.PREFERRED_SIZE, 300, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGap(0, 0, Short.MAX_VALUE))
+                        .addGroup(jPanel3Layout.createSequentialGroup()
+                            .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addComponent(jLabel12)
+                                .addComponent(txtDelayScan, javax.swing.GroupLayout.PREFERRED_SIZE, 145, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addComponent(jLabel13)
+                                .addComponent(txtDelayOk, javax.swing.GroupLayout.PREFERRED_SIZE, 145, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                    .addComponent(txtApiAccountInfo)
                     .addGroup(jPanel3Layout.createSequentialGroup()
                         .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel12)
-                            .addComponent(txtDelayScan, javax.swing.GroupLayout.PREFERRED_SIZE, 145, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel13)
-                            .addComponent(txtDelayOk, javax.swing.GroupLayout.PREFERRED_SIZE, 145, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addComponent(jLabel17)
+                            .addComponent(jLabel18))
+                        .addGap(0, 0, Short.MAX_VALUE)))
+                .addContainerGap())
         );
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -328,7 +368,15 @@ public class FrmConfig extends javax.swing.JFrame {
                         .addComponent(jLabel13)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(txtDelayOk, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jLabel17)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(txtApiRequestToken, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jLabel18)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(txtApiAccountInfo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(15, Short.MAX_VALUE))
         );
 
         jSplitPane1.setRightComponent(jPanel3);
@@ -352,7 +400,7 @@ public class FrmConfig extends javax.swing.JFrame {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jSplitPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 370, Short.MAX_VALUE)
+                .addComponent(jSplitPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 476, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnCancel)
@@ -390,6 +438,10 @@ public class FrmConfig extends javax.swing.JFrame {
             newConfig.put("isDebugging", isDebugging);
             newConfig.put("delayScan", txtDelayScan.getText());
             newConfig.put("delayOk", txtDelayOk.getText());
+            newConfig.put("clientId", txtClientId.getText());
+            newConfig.put("clientSecret", txtClientSecret.getText());
+            newConfig.put("apiRequestToken", txtApiRequestToken.getText());
+            newConfig.put("apiAccountInfo", txtApiAccountInfo.getText());
         } catch (Exception e) {
         }
         
@@ -470,6 +522,10 @@ public class FrmConfig extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel12;
     private javax.swing.JLabel jLabel13;
     private javax.swing.JLabel jLabel14;
+    private javax.swing.JLabel jLabel15;
+    private javax.swing.JLabel jLabel16;
+    private javax.swing.JLabel jLabel17;
+    private javax.swing.JLabel jLabel18;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
@@ -483,9 +539,13 @@ public class FrmConfig extends javax.swing.JFrame {
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JSplitPane jSplitPane1;
     private javax.swing.JTextArea txtAccessToken;
+    private javax.swing.JTextField txtApiAccountInfo;
     private javax.swing.JTextField txtApiNilaiTimbangan;
     private javax.swing.JTextField txtApiQrCode;
+    private javax.swing.JTextField txtApiRequestToken;
     private javax.swing.JTextField txtApiUpdateTrack;
+    private javax.swing.JTextField txtClientId;
+    private javax.swing.JTextField txtClientSecret;
     private javax.swing.JTextField txtDelayOk;
     private javax.swing.JTextField txtDelayScan;
     private javax.swing.JTextField txtKodeTimbangan;

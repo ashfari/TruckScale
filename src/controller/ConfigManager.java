@@ -60,6 +60,10 @@ public class ConfigManager {
         config.put("isDebugging", "true");
         config.put("delayScan", "0.9");
         config.put("delayOk", "5");
+        config.put("clientId", "");
+        config.put("clientSecret", "");
+        config.put("apiRequestToken", "http://localhost:8000/oauth/token");
+        config.put("apiAccountInfo", "http://localhost:8000/customer/v1");
         
 //        Write file
         try (FileWriter file = new FileWriter("./config")) {
