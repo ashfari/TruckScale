@@ -45,7 +45,8 @@ public class ScannerManager {
 
     public Object[][] createScanner() {
 //        Write file
-        String content = "1,Scanner Serial 1,Serial Based,0,null,weigh-in,1,true;";
+        String content = "1,Scanner Serial 1,Serial Based,,0,weigh-in,1,true;"
+                + "2,Scanner IP 1,IP Based,127.0.0.1,23,weigh-in,1,true;";
         try (FileWriter file = new FileWriter("./scanner")) {
             file.write(content);
             file.flush();
