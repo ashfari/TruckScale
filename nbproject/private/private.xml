@@ -6,18 +6,23 @@
             <file>file:/E:/Sahab/Work/Truku/Java/TruckScale/src/controller/ConfigManager.java</file>
             <file>file:/E:/Sahab/Work/Truku/Java/TruckScale/src/controller/PasswordManager.java</file>
             <file>file:/E:/Sahab/Work/Truku/Java/TruckScale/src/view/FrmMain.java</file>
-            <file>file:/E:/Sahab/Work/Truku/Java/TruckScale/src/controller/AveryWeighTronix.java</file>
             <file>file:/E:/Sahab/Work/Truku/Java/TruckScale/src/view/FrmNotification.java</file>
             <file>file:/E:/Sahab/Work/Truku/Java/TruckScale/src/controller/OkHttpManager.java</file>
             <file>file:/E:/Sahab/Work/Truku/Java/TruckScale/src/view/FrmPassword.java</file>
             <file>file:/E:/Sahab/Work/Truku/Java/TruckScale/src/view/FrmUpdateTrack.java</file>
+            <file>file:/E:/Sahab/Work/Truku/Java/TruckScale/src/controller/ThreadScannerIpBased.java</file>
             <file>file:/E:/Sahab/Work/Truku/Java/TruckScale/src/controller/ApiManager.java</file>
             <file>file:/E:/Sahab/Work/Truku/Java/TruckScale/src/controller/ThreadScanner.java</file>
             <file>file:/E:/Sahab/Work/Truku/Java/TruckScale/src/view/FrmLogin.java</file>
             <file>file:/E:/Sahab/Work/Truku/Java/TruckScale/src/controller/ThreadWeight.java</file>
             <file>file:/E:/Sahab/Work/Truku/Java/TruckScale/src/view/TryingPrintJSON.java</file>
             <file>file:/E:/Sahab/Work/Truku/Java/TruckScale/src/view/FrmConfig.java</file>
+            <file>file:/E:/Sahab/Work/Truku/Java/TruckScale/src/view/FrmListScannerAdd.java</file>
             <file>file:/E:/Sahab/Work/Truku/Java/TruckScale/src/view/FrmQrCode.java</file>
+            <file>file:/E:/Sahab/Work/Truku/Java/TruckScale/src/controller/AuthManager.java</file>
+            <file>file:/E:/Sahab/Work/Truku/Java/TruckScale/src/view/FrmListScanner.java</file>
+            <file>file:/E:/Sahab/Work/Truku/Java/TruckScale/src/example/TelnetClientExample.java</file>
+            <file>file:/E:/Sahab/Work/Truku/Java/TruckScale/src/controller/SerialPortManager.java</file>
         </group>
     </open-files>
 </project-private>

@@ -8,7 +8,9 @@ package view;
 import controller.AuthManager;
 import controller.ConfigManager;
 import controller.OkHttpManager;
+import controller.PasswordManager;
 import java.awt.event.KeyEvent;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -44,6 +46,7 @@ public class FrmLogin extends javax.swing.JFrame {
     }
     
     private void createObjects() {
+        new PasswordManager().createPassword();
         this.configManager = new ConfigManager();
         this.config = new JSONObject();
         try {
@@ -57,12 +60,12 @@ public class FrmLogin extends javax.swing.JFrame {
         this.okHttpManager = new OkHttpManager();
         this.authManager = new AuthManager();
         
-        try {
-            token = authManager.readAuth();
-            login();
-        } catch (FileNotFoundException ex) {
-            
-        }
+//        try {
+//            token = authManager.readAuth();
+//            login();
+//        } catch (FileNotFoundException ex) {
+//            
+//        }
     }
     
     private void requestToken() {
@@ -97,7 +100,7 @@ public class FrmLogin extends javax.swing.JFrame {
             this.apiResponse = okHttpManager.sendGetAccountInfo(config.get("apiAccountInfo").toString(), this.token);
             if (this.apiResponse.isSuccessful()) {
                 this.setVisible(false);
-                new FrmMain();
+                new FrmMain().setVisible(true);
             } else {
                 System.out.println(new JSONObject(this.apiResponse.body().string()).getString("message"));
             }
@@ -295,7 +298,13 @@ public class FrmLogin extends javax.swing.JFrame {
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new FrmLogin().setVisible(true);
+                String path = "./auth";
+                File file = new File(path);
+                if (file.exists()) {
+                    new FrmMain().setVisible(true);
+                } else {
+                    new FrmLogin().setVisible(true);
+                }
             }
         });
     }

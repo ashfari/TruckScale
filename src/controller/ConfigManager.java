@@ -47,9 +47,7 @@ public class ConfigManager {
 //        Config JSON
         JSONObject config = new JSONObject();
         config.put("title", "Truck Scale");
-        config.put("comPort", "0");
         config.put("kodeTimbangan", "1");
-        config.put("trackName", "weigh-in");
         config.put("accessToken", "");
         config.put("apiTimbangan", "http://localhost:8000/api/weigh-bridge/scans");
         config.put("apiQrCode", "http://localhost:8000/api/customer/v1/orders/scan");

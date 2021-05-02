@@ -10,7 +10,6 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.LinkedHashMap;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -70,14 +69,6 @@ public class ThreadScanner extends Thread {
         } catch (JSONException ex) {
             Logger.getLogger(ThreadScanner.class.getName()).log(Level.SEVERE, null, ex);
         }
-//        try {
-//            frmMain.averyWeighTronix.getWeight();
-//            if (frmMain.isDebugging.equals("true")) {
-//                System.out.println("get weight from avery weight tronix");
-//            }
-//        } catch (JSONException ex) {
-//            Logger.getLogger(ThreadScanner.class.getName()).log(Level.SEVERE, null, ex);
-//        }
     }
     
     private void resetDelay() {
@@ -97,13 +88,16 @@ public class ThreadScanner extends Thread {
         while (isRunning) {
             try {
                 frmMain.config = frmMain.configManager.readConfig();
+                frmMain.scanner = frmMain.scannerManager.readScanner();
                 implementConfig();
+                frmMain.setTabResults();
                 
                 if (frmMain.isDebugging.equals("true") && frmMain.manualQrCode.length() > 0) {
                     frmMain.scannerInput = frmMain.manualQrCode;
                 }
 
-                input =  frmMain.scannerInput;
+                input = frmMain.scannerInput;
+                System.out.println(input);
                 
                 if (frmMain.isDebugging.equals("true") && input.length() > 0) {
                     System.out.println(input);
@@ -121,9 +115,9 @@ public class ThreadScanner extends Thread {
                     if (delay <= 0) {
                         scannerParams.put("qrcode", input);
                         scannerParams.put("wb_id", frmMain.config.getString("kodeTimbangan"));
-                        scannerParams.put("track_name", frmMain.config.getString("trackName"));
+                        scannerParams.put("track_name", frmMain.scanner[0][5].toString());
                         try {
-                            result = frmMain.okHttpManager.sendPost(frmMain.config.get("apiQrCode").toString(), scannerParams, frmMain.config.get("accessToken").toString());
+                            result = frmMain.okHttpManager.sendPost(frmMain.config.get("apiQrCode").toString(), scannerParams, frmMain.authManager.readAuth());
                             showResult(result);
                             frmMain.scannerInput = "";
                             frmMain.manualQrCode = "";

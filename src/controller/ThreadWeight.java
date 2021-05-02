@@ -26,7 +26,7 @@ public class ThreadWeight extends Thread {
     private boolean isRunning;
     Date date = new Date();
     FrmMain frmMain = null;
-    AveryWeighTronix averyWeighTronix = null;
+    SerialPortManager serialPortManager = null;
     Response apiResponse = null;
     int refreshRateConfig = 0;
     int refreshRate = 0;
@@ -39,7 +39,7 @@ public class ThreadWeight extends Thread {
     }
     
     private void createObjects() throws JSONException, FileNotFoundException {
-        this.averyWeighTronix = new AveryWeighTronix(frmMain);
+        this.serialPortManager = new SerialPortManager(frmMain);
         this.params = new JSONObject();
     }
     
@@ -67,7 +67,10 @@ public class ThreadWeight extends Thread {
                 if (refreshRate >= refreshRateConfig) {
                     frmMain.dotLabel.setEnabled(true);
                     
-                    averyWeighTronix.getWeight();
+                    try {
+                        serialPortManager.getWeight();
+                    } catch (Exception e) {
+                    }
 
                     if (frmMain.isDebugging.equals("true")) {
                         System.out.println("current weight : " + frmMain.currentWeight.toString());
@@ -113,11 +116,10 @@ public class ThreadWeight extends Thread {
                 // Let the thread sleep for a while.
                 Thread.sleep(1000);
             }
-        } catch (InterruptedException e) {
-        } catch (JSONException ex) {
-//            Logger.getLogger(ThreadWeight.class.getName()).log(Level.SEVERE, null, ex);
-            System.out.println("no port configured");
+        }catch (InterruptedException e) {
         }
+//            Logger.getLogger(ThreadWeight.class.getName()).log(Level.SEVERE, null, ex);
+        
     }
 
     public void start() {
