@@ -17,6 +17,7 @@ import controller.ScannerManager;
 import controller.ThreadScannerIpBased;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.KeyEventDispatcher;
 import java.awt.KeyboardFocusManager;
 import java.awt.Point;
@@ -27,10 +28,19 @@ import java.io.FileNotFoundException;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JScrollPane;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
+import javax.swing.JSeparator;
+import javax.swing.JTextArea;
+import javax.swing.SpringLayout;
+import javax.swing.SwingConstants;
 import javax.swing.UIManager;
+import javax.swing.border.EmptyBorder;
 import okhttp3.Response;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -65,6 +75,8 @@ public class FrmMain extends javax.swing.JFrame {
      * Creates new form FrmMain
      */
     public FrmMain() {
+        this.setExtendedState(JFrame.MAXIMIZED_BOTH); 
+        this.setUndecorated(true);
         initComponents();
         this.setLocationRelativeTo(null);
         this.setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("truku.png")));
@@ -129,14 +141,68 @@ public class FrmMain extends javax.swing.JFrame {
     
     public void setTabResults() {
         tabResult.setTitleAt(0, this.scanner[0][1].toString());
-        tabResult.setTitleAt(1, this.scanner[1][1].toString());
-        for (int i = 2; i < this.scanner.length; i++) {
+        for (int i = 1; i < this.scanner.length; i++) {
             try {
                 tabResult.setTitleAt(i, this.scanner[i][1].toString());
             } catch (Exception e) {
-                tabResult.addTab(this.scanner[i][1].toString(), new JPanel());
+                tabResult.addTab(this.scanner[i][1].toString(), this.createNewPanelResult());
             }
         }
+    }
+    
+    private JPanel createNewPanelResult() {
+        JPanel panel = new JPanel();
+        JLabel title = new JLabel("QR Code Scan");
+        JSeparator separator = new JSeparator();
+        JTextArea result = new JTextArea("Ready...");
+        JScrollPane scrollPane = new JScrollPane(result);
+        
+        SpringLayout layout = new SpringLayout();
+        panel.setLayout(layout);
+        
+        panel.add(title);
+        panel.add(separator);
+        panel.add(scrollPane);
+        
+        panel.setBackground(Color.white);
+        panel.setBorder(new EmptyBorder(10, 10, 10, 10));
+        
+        layout.putConstraint(SpringLayout.NORTH, title, 0, SpringLayout.NORTH, panel);
+        layout.putConstraint(SpringLayout.WEST, title, 0, SpringLayout.WEST, panel);
+        layout.putConstraint(SpringLayout.EAST, title, 0, SpringLayout.EAST, panel);
+        layout.putConstraint(SpringLayout.NORTH, separator, 11, SpringLayout.SOUTH, title);
+        layout.putConstraint(SpringLayout.WEST, separator, 0, SpringLayout.WEST, panel);
+        layout.putConstraint(SpringLayout.EAST, separator, 0, SpringLayout.EAST, panel);
+        layout.putConstraint(SpringLayout.NORTH, scrollPane, 0, SpringLayout.SOUTH, separator);
+        layout.putConstraint(SpringLayout.WEST, scrollPane, 0, SpringLayout.WEST, panel);
+        layout.putConstraint(SpringLayout.EAST, scrollPane, 0, SpringLayout.EAST, panel);
+        layout.putConstraint(SpringLayout.SOUTH, scrollPane, 0, SpringLayout.SOUTH, panel);
+        layout.putConstraint(SpringLayout.NORTH, result, 0, SpringLayout.NORTH, scrollPane);
+        layout.putConstraint(SpringLayout.EAST, result, 0, SpringLayout.EAST, scrollPane);
+        layout.putConstraint(SpringLayout.WEST, result, 0, SpringLayout.WEST, scrollPane);
+        layout.putConstraint(SpringLayout.SOUTH, result, 0, SpringLayout.SOUTH, scrollPane);
+        
+        title.setFont(new java.awt.Font("Monospaced", 1, 18));
+        title.setHorizontalAlignment(SwingConstants.CENTER);
+        
+        separator.setOrientation(SwingConstants.HORIZONTAL);
+        
+        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        scrollPane.setBorder(new EmptyBorder(10, 0, 0, 0));
+        scrollPane.setBackground(Color.white);
+        
+        result.setEditable(false);
+        result.setFont(new java.awt.Font("Monospaced", 0, 18)); // NOI18N
+        result.setLineWrap(true);
+        result.setWrapStyleWord(true);
+
+        jScrollPane2.setViewportView(txtResultScan);
+        
+//        Create result thread
+        
+        
+        return panel;
     }
     
     private void createUserPopUp() {
@@ -242,11 +308,6 @@ public class FrmMain extends javax.swing.JFrame {
         txtResultScan = new javax.swing.JTextArea();
         jLabel2 = new javax.swing.JLabel();
         jSeparator1 = new javax.swing.JSeparator();
-        panelResult1 = new javax.swing.JPanel();
-        jScrollPane3 = new javax.swing.JScrollPane();
-        txtResultScan1 = new javax.swing.JTextArea();
-        jLabel3 = new javax.swing.JLabel();
-        jSeparator2 = new javax.swing.JSeparator();
         btn_qrcode = new javax.swing.JButton();
         btnUser = new javax.swing.JButton();
         jButton2 = new javax.swing.JButton();
@@ -353,7 +414,7 @@ public class FrmMain extends javax.swing.JFrame {
             jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel6Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(weightValue, javax.swing.GroupLayout.DEFAULT_SIZE, 264, Short.MAX_VALUE)
+                .addComponent(weightValue, javax.swing.GroupLayout.DEFAULT_SIZE, 329, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(weightUnit, javax.swing.GroupLayout.PREFERRED_SIZE, 75, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
@@ -386,7 +447,7 @@ public class FrmMain extends javax.swing.JFrame {
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, 349, Short.MAX_VALUE)
+                    .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, 414, Short.MAX_VALUE)
                     .addComponent(last_sent, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
@@ -407,8 +468,8 @@ public class FrmMain extends javax.swing.JFrame {
             .addGroup(jPanel7Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jPanel6, javax.swing.GroupLayout.DEFAULT_SIZE, 369, Short.MAX_VALUE)
-                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, 369, Short.MAX_VALUE))
+                    .addComponent(jPanel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         jPanel7Layout.setVerticalGroup(
@@ -447,7 +508,7 @@ public class FrmMain extends javax.swing.JFrame {
             .addGroup(panelResultLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(panelResultLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, 341, Short.MAX_VALUE)
+                    .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, 276, Short.MAX_VALUE)
                     .addComponent(jSeparator1)
                     .addComponent(jScrollPane2))
                 .addContainerGap())
@@ -466,56 +527,13 @@ public class FrmMain extends javax.swing.JFrame {
 
         tabResult.addTab("tab1", panelResult);
 
-        panelResult1.setBackground(new java.awt.Color(255, 255, 255));
-
-        jScrollPane3.setBorder(null);
-
-        txtResultScan1.setEditable(false);
-        txtResultScan1.setColumns(20);
-        txtResultScan1.setFont(new java.awt.Font("Monospaced", 0, 18)); // NOI18N
-        txtResultScan1.setLineWrap(true);
-        txtResultScan1.setRows(5);
-        txtResultScan1.setWrapStyleWord(true);
-        txtResultScan1.setBorder(null);
-        jScrollPane3.setViewportView(txtResultScan1);
-
-        jLabel3.setFont(new java.awt.Font("Monospaced", 1, 18)); // NOI18N
-        jLabel3.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel3.setText("QR Code Scan");
-
-        javax.swing.GroupLayout panelResult1Layout = new javax.swing.GroupLayout(panelResult1);
-        panelResult1.setLayout(panelResult1Layout);
-        panelResult1Layout.setHorizontalGroup(
-            panelResult1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(panelResult1Layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(panelResult1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, 341, Short.MAX_VALUE)
-                    .addComponent(jSeparator2)
-                    .addComponent(jScrollPane3))
-                .addContainerGap())
-        );
-        panelResult1Layout.setVerticalGroup(
-            panelResult1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(panelResult1Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jLabel3)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, 6, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 256, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
-        );
-
-        tabResult.addTab("tab1", panelResult1);
-
         javax.swing.GroupLayout jPanel8Layout = new javax.swing.GroupLayout(jPanel8);
         jPanel8.setLayout(jPanel8Layout);
         jPanel8Layout.setHorizontalGroup(
             jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel8Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(tabResult)
+                .addComponent(tabResult, javax.swing.GroupLayout.DEFAULT_SIZE, 301, Short.MAX_VALUE)
                 .addContainerGap())
         );
         jPanel8Layout.setVerticalGroup(
@@ -589,7 +607,7 @@ public class FrmMain extends javax.swing.JFrame {
                 .addComponent(jSplitPane1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
         );
 
         pack();
@@ -674,7 +692,6 @@ public class FrmMain extends javax.swing.JFrame {
     private javax.swing.JButton jButton2;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
-    private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
@@ -683,19 +700,15 @@ public class FrmMain extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel7;
     private javax.swing.JPanel jPanel8;
     private javax.swing.JScrollPane jScrollPane2;
-    private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JSeparator jSeparator1;
-    private javax.swing.JSeparator jSeparator2;
     private javax.swing.JSplitPane jSplitPane1;
     public javax.swing.JLabel last_sent;
     public javax.swing.JLabel main_title;
     private javax.swing.JMenuItem menuItemLogout;
     private javax.swing.JPanel panelResult;
-    private javax.swing.JPanel panelResult1;
     public javax.swing.JLabel refreshRateLabel;
     private javax.swing.JTabbedPane tabResult;
     public javax.swing.JTextArea txtResultScan;
-    public javax.swing.JTextArea txtResultScan1;
     public javax.swing.JLabel weightUnit;
     public javax.swing.JLabel weightValue;
     // End of variables declaration//GEN-END:variables
