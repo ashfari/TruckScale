@@ -14,10 +14,11 @@ import controller.ConfigManager;
 import controller.OkHttpManager;
 import controller.PasswordManager;
 import controller.ScannerManager;
+import controller.ThreadMain;
 import controller.ThreadScannerIpBased;
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.KeyEventDispatcher;
 import java.awt.KeyboardFocusManager;
 import java.awt.Point;
@@ -51,10 +52,11 @@ import org.json.JSONObject;
  */
 public class FrmMain extends javax.swing.JFrame {
     
+    ThreadMain threadMain = null;
     ThreadWeight threadWeight = null;
     ThreadScanner threadScanner = null;
     ThreadScannerIpBased threadScannerIpBased = null;
-    public SerialPortManager averyWeighTronix = null;
+    public SerialPortManager serialPortManager = null;
     public ConfigManager configManager = null;
     public ScannerManager scannerManager = null;
     public JSONObject currentWeight = null;
@@ -68,6 +70,7 @@ public class FrmMain extends javax.swing.JFrame {
     public JSONObject auth = null;
     public AuthManager authManager = null;
     public Object[][] scanner = null;
+    public Object[][] scannerFromSetting = null;
     Response result = null;
     JPopupMenu menu;
 
@@ -75,19 +78,17 @@ public class FrmMain extends javax.swing.JFrame {
      * Creates new form FrmMain
      */
     public FrmMain() {
-        this.setExtendedState(JFrame.MAXIMIZED_BOTH); 
-        this.setUndecorated(true);
+//        this.setExtendedState(JFrame.MAXIMIZED_BOTH); 
+//        this.setUndecorated(true);
         initComponents();
         this.setLocationRelativeTo(null);
         this.setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("truku.png")));
 
         createObjects();
-        
-        this.auth = auth;
 
-        threadScanner.start();
-        threadScannerIpBased.start();
-        threadWeight.start();
+        this.threadMain.start();
+//        this.threadScannerIpBased.start();
+        this.threadWeight.start();
     }
     
     public void createObjects() {
@@ -107,14 +108,14 @@ public class FrmMain extends javax.swing.JFrame {
             this.currentWeight = new JSONObject();
             new PasswordManager().createPassword();
             globalKeyListener();
-            txtResultScan.setText("Ready...");
             this.auth = new JSONObject();
             this.authManager = new AuthManager();
-            this.result = this.okHttpManager.sendGetAccountInfo(config.getString("apiAccountInfo"), this.authManager.readAuth());
+            this.result = this.okHttpManager.sendGetAccountInfo(this.config.getString("apiAccountInfo"), this.authManager.readAuth());
             if (this.result.isSuccessful()) {
                 this.auth = new JSONObject(result.body().string());
                 btnUser.setText(this.auth.getString("name"));
             } else {
+                this.authManager.deleteAuth();
                 this.setVisible(false);
                 new FrmLogin().setVisible(true);
             }
@@ -125,6 +126,7 @@ public class FrmMain extends javax.swing.JFrame {
         } catch (Exception ex) {
             Logger.getLogger(FrmMain.class.getName()).log(Level.SEVERE, null, ex);
         }
+        this.threadMain = new ThreadMain(this);
         try {
             this.threadWeight = new ThreadWeight(this);
         } catch (JSONException ex) {
@@ -132,40 +134,61 @@ public class FrmMain extends javax.swing.JFrame {
         } catch (FileNotFoundException ex) {
             Logger.getLogger(FrmMain.class.getName()).log(Level.SEVERE, null, ex);
         }
-        this.threadScanner = new ThreadScanner(this);
-        this.threadScannerIpBased = new ThreadScannerIpBased(this, "127.0.0.1", 23);
-        this.averyWeighTronix = new SerialPortManager();
+//        this.threadScannerIpBased = new ThreadScannerIpBased(this, "127.0.0.1", 23);
+        this.serialPortManager = new SerialPortManager();
         
         this.setTabResults();
     }
     
     public void setTabResults() {
-        tabResult.setTitleAt(0, this.scanner[0][1].toString());
-        for (int i = 1; i < this.scanner.length; i++) {
-            try {
-                tabResult.setTitleAt(i, this.scanner[i][1].toString());
-            } catch (Exception e) {
-                tabResult.addTab(this.scanner[i][1].toString(), this.createNewPanelResult());
+        tabResult.removeAll();
+        if (this.scannerFromSetting != null) {
+            this.scanner = this.scannerFromSetting;
+            this.scannerFromSetting = null;
+        }
+        for (int i = 0; i < this.scanner.length; i++) {
+            if (this.scanner[i][7].toString().equals("true")) {
+                tabResult.addTab(this.scanner[i][1].toString(), this.createNewPanelResult(i));
             }
         }
     }
     
-    private JPanel createNewPanelResult() {
+    public void tabNotify(int indexScanner) {
+        tabResult.setForegroundAt(indexScanner, Color.RED);
+    }
+    
+    private JPanel createNewPanelResult(int indexScanner) {
         JPanel panel = new JPanel();
         JLabel title = new JLabel("QR Code Scan");
         JSeparator separator = new JSeparator();
-        JTextArea result = new JTextArea("Ready...");
+        JSeparator separatorBottom = new JSeparator();
+        JTextArea result = new JTextArea("");
         JScrollPane scrollPane = new JScrollPane(result);
+        JLabel statusProcess = new JLabel("Status Proses");
+        JPanel buttonGroup = new JPanel();
+        JButton doneProcess = new JButton("OK");
+        JButton cancelProcess = new JButton("Cancel");
         
         SpringLayout layout = new SpringLayout();
         panel.setLayout(layout);
         
+        buttonGroup.setLayout(new FlowLayout());
+        
         panel.add(title);
         panel.add(separator);
         panel.add(scrollPane);
+        panel.add(separatorBottom);
+        panel.add(statusProcess);
+        panel.add(buttonGroup);
+        
+        buttonGroup.add(doneProcess);
+        buttonGroup.add(cancelProcess);
         
         panel.setBackground(Color.white);
         panel.setBorder(new EmptyBorder(10, 10, 10, 10));
+        
+        buttonGroup.setBackground(Color.white);
+        buttonGroup.setBorder(new EmptyBorder(0, 0, 0, 0));
         
         layout.putConstraint(SpringLayout.NORTH, title, 0, SpringLayout.NORTH, panel);
         layout.putConstraint(SpringLayout.WEST, title, 0, SpringLayout.WEST, panel);
@@ -173,19 +196,29 @@ public class FrmMain extends javax.swing.JFrame {
         layout.putConstraint(SpringLayout.NORTH, separator, 11, SpringLayout.SOUTH, title);
         layout.putConstraint(SpringLayout.WEST, separator, 0, SpringLayout.WEST, panel);
         layout.putConstraint(SpringLayout.EAST, separator, 0, SpringLayout.EAST, panel);
-        layout.putConstraint(SpringLayout.NORTH, scrollPane, 0, SpringLayout.SOUTH, separator);
-        layout.putConstraint(SpringLayout.WEST, scrollPane, 0, SpringLayout.WEST, panel);
-        layout.putConstraint(SpringLayout.EAST, scrollPane, 0, SpringLayout.EAST, panel);
-        layout.putConstraint(SpringLayout.SOUTH, scrollPane, 0, SpringLayout.SOUTH, panel);
         layout.putConstraint(SpringLayout.NORTH, result, 0, SpringLayout.NORTH, scrollPane);
         layout.putConstraint(SpringLayout.EAST, result, 0, SpringLayout.EAST, scrollPane);
         layout.putConstraint(SpringLayout.WEST, result, 0, SpringLayout.WEST, scrollPane);
         layout.putConstraint(SpringLayout.SOUTH, result, 0, SpringLayout.SOUTH, scrollPane);
+        layout.putConstraint(SpringLayout.NORTH, scrollPane, 0, SpringLayout.SOUTH, separator);
+        layout.putConstraint(SpringLayout.WEST, scrollPane, 0, SpringLayout.WEST, panel);
+        layout.putConstraint(SpringLayout.EAST, scrollPane, 0, SpringLayout.EAST, panel);
+        layout.putConstraint(SpringLayout.SOUTH, scrollPane, 0, SpringLayout.NORTH, separatorBottom);
+        layout.putConstraint(SpringLayout.WEST, separatorBottom, 0, SpringLayout.WEST, panel);
+        layout.putConstraint(SpringLayout.EAST, separatorBottom, 0, SpringLayout.EAST, panel);
+        layout.putConstraint(SpringLayout.SOUTH, separatorBottom, 0, SpringLayout.NORTH, statusProcess);
+        layout.putConstraint(SpringLayout.WEST, statusProcess, 0, SpringLayout.WEST, panel);
+        layout.putConstraint(SpringLayout.EAST, statusProcess, 0, SpringLayout.EAST, panel);
+        layout.putConstraint(SpringLayout.SOUTH, statusProcess, 0, SpringLayout.NORTH, buttonGroup);
+        layout.putConstraint(SpringLayout.WEST, buttonGroup, 0, SpringLayout.WEST, panel);
+        layout.putConstraint(SpringLayout.EAST, buttonGroup, 0, SpringLayout.EAST, panel);
+        layout.putConstraint(SpringLayout.SOUTH, buttonGroup, 0, SpringLayout.SOUTH, panel);
         
         title.setFont(new java.awt.Font("Monospaced", 1, 18));
         title.setHorizontalAlignment(SwingConstants.CENTER);
         
         separator.setOrientation(SwingConstants.HORIZONTAL);
+        separatorBottom.setOrientation(SwingConstants.HORIZONTAL);
         
         scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
@@ -196,11 +229,21 @@ public class FrmMain extends javax.swing.JFrame {
         result.setFont(new java.awt.Font("Monospaced", 0, 18)); // NOI18N
         result.setLineWrap(true);
         result.setWrapStyleWord(true);
-
-        jScrollPane2.setViewportView(txtResultScan);
+        
+        statusProcess.setHorizontalAlignment(SwingConstants.CENTER);
+        
+        doneProcess.setEnabled(false);
+        cancelProcess.setEnabled(false);
         
 //        Create result thread
-        
+        if (this.scanner[indexScanner][2].toString().equals("IP Based")) {
+            this.threadScannerIpBased = new ThreadScannerIpBased(this, 
+                title, result, statusProcess, doneProcess, cancelProcess, indexScanner);
+            this.threadScannerIpBased.start();
+        } else {
+            this.threadScanner = new ThreadScanner(this, title, result, indexScanner);
+            this.threadScanner.start();
+        }
         
         return panel;
     }
@@ -254,11 +297,6 @@ public class FrmMain extends javax.swing.JFrame {
             });
     }
     
-    public void resetResultScan() {
-        txtResultScan.setForeground(Color.BLACK);
-        txtResultScan.setText("Ready...");
-    }
-    
     public void setDebugging() {
         try {
             this.isDebugging = config.getString("isDebugging");
@@ -303,11 +341,6 @@ public class FrmMain extends javax.swing.JFrame {
         last_sent = new javax.swing.JLabel();
         jPanel8 = new javax.swing.JPanel();
         tabResult = new javax.swing.JTabbedPane();
-        panelResult = new javax.swing.JPanel();
-        jScrollPane2 = new javax.swing.JScrollPane();
-        txtResultScan = new javax.swing.JTextArea();
-        jLabel2 = new javax.swing.JLabel();
-        jSeparator1 = new javax.swing.JSeparator();
         btn_qrcode = new javax.swing.JButton();
         btnUser = new javax.swing.JButton();
         jButton2 = new javax.swing.JButton();
@@ -439,6 +472,7 @@ public class FrmMain extends javax.swing.JFrame {
         jLabel1.setText("WEIGHT");
 
         last_sent.setText("Last sent : -");
+        last_sent.setVerticalAlignment(javax.swing.SwingConstants.BOTTOM);
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -447,7 +481,7 @@ public class FrmMain extends javax.swing.JFrame {
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, 414, Short.MAX_VALUE)
+                    .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, 349, Short.MAX_VALUE)
                     .addComponent(last_sent, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
@@ -468,8 +502,8 @@ public class FrmMain extends javax.swing.JFrame {
             .addGroup(jPanel7Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jPanel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(jPanel6, javax.swing.GroupLayout.DEFAULT_SIZE, 369, Short.MAX_VALUE)
+                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, 369, Short.MAX_VALUE))
                 .addContainerGap())
         );
         jPanel7Layout.setVerticalGroup(
@@ -484,49 +518,6 @@ public class FrmMain extends javax.swing.JFrame {
 
         jSplitPane1.setLeftComponent(jPanel7);
 
-        panelResult.setBackground(new java.awt.Color(255, 255, 255));
-
-        jScrollPane2.setBorder(null);
-
-        txtResultScan.setEditable(false);
-        txtResultScan.setColumns(20);
-        txtResultScan.setFont(new java.awt.Font("Monospaced", 0, 18)); // NOI18N
-        txtResultScan.setLineWrap(true);
-        txtResultScan.setRows(5);
-        txtResultScan.setWrapStyleWord(true);
-        txtResultScan.setBorder(null);
-        jScrollPane2.setViewportView(txtResultScan);
-
-        jLabel2.setFont(new java.awt.Font("Monospaced", 1, 18)); // NOI18N
-        jLabel2.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel2.setText("QR Code Scan");
-
-        javax.swing.GroupLayout panelResultLayout = new javax.swing.GroupLayout(panelResult);
-        panelResult.setLayout(panelResultLayout);
-        panelResultLayout.setHorizontalGroup(
-            panelResultLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(panelResultLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(panelResultLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, 276, Short.MAX_VALUE)
-                    .addComponent(jSeparator1)
-                    .addComponent(jScrollPane2))
-                .addContainerGap())
-        );
-        panelResultLayout.setVerticalGroup(
-            panelResultLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(panelResultLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jLabel2)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 6, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 256, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
-        );
-
-        tabResult.addTab("tab1", panelResult);
-
         javax.swing.GroupLayout jPanel8Layout = new javax.swing.GroupLayout(jPanel8);
         jPanel8.setLayout(jPanel8Layout);
         jPanel8Layout.setHorizontalGroup(
@@ -540,7 +531,7 @@ public class FrmMain extends javax.swing.JFrame {
             jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel8Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(tabResult, javax.swing.GroupLayout.PREFERRED_SIZE, 346, Short.MAX_VALUE)
+                .addComponent(tabResult, javax.swing.GroupLayout.DEFAULT_SIZE, 346, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
@@ -642,7 +633,7 @@ public class FrmMain extends javax.swing.JFrame {
     }//GEN-LAST:event_menuItemLogoutActionPerformed
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
-        new FrmListScanner().setVisible(true);
+        new FrmListScanner(this).setVisible(true);
     }//GEN-LAST:event_jButton2ActionPerformed
 
     /**
@@ -691,7 +682,6 @@ public class FrmMain extends javax.swing.JFrame {
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
     private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
@@ -699,16 +689,12 @@ public class FrmMain extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel6;
     private javax.swing.JPanel jPanel7;
     private javax.swing.JPanel jPanel8;
-    private javax.swing.JScrollPane jScrollPane2;
-    private javax.swing.JSeparator jSeparator1;
     private javax.swing.JSplitPane jSplitPane1;
     public javax.swing.JLabel last_sent;
     public javax.swing.JLabel main_title;
     private javax.swing.JMenuItem menuItemLogout;
-    private javax.swing.JPanel panelResult;
     public javax.swing.JLabel refreshRateLabel;
     private javax.swing.JTabbedPane tabResult;
-    public javax.swing.JTextArea txtResultScan;
     public javax.swing.JLabel weightUnit;
     public javax.swing.JLabel weightValue;
     // End of variables declaration//GEN-END:variables

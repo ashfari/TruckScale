@@ -62,14 +62,17 @@ public class FrmConfig extends javax.swing.JFrame {
     }
     
     private void setForm() {
-//        try {
-//            cbComPort.setSelectedIndex(Integer.parseInt(config.get("comPort").toString()));
-//        } catch (Exception e) {
-//        }
+        try {
+            cbComPort.setSelectedIndex(Integer.parseInt(config.get("comPort").toString()));
+        } catch (Exception e) {
+        }
+        try {
+            txtAccessToken.setText(authManager.readAuth());
+        } catch (FileNotFoundException ex) {
+        }
         try {
             txtTitleAplikasi.setText(config.getString("title"));
             txtKodeTimbangan.setText(config.getString("kodeTimbangan"));
-            txtAccessToken.setText(authManager.readAuth());
             txtApiNilaiTimbangan.setText(config.getString("apiTimbangan"));
             txtApiQrCode.setText(config.getString("apiQrCode"));
             txtApiUpdateTrack.setText(config.getString("apiUpdateTrack"));
@@ -120,6 +123,8 @@ public class FrmConfig extends javax.swing.JFrame {
         txtMinWeight = new javax.swing.JTextField();
         jLabel13 = new javax.swing.JLabel();
         txtKodeTimbangan = new javax.swing.JTextField();
+        cbComPort = new javax.swing.JComboBox<>();
+        jLabel15 = new javax.swing.JLabel();
         jPanel5 = new javax.swing.JPanel();
         jLabel35 = new javax.swing.JLabel();
         txtApiRequestToken = new javax.swing.JTextField();
@@ -195,6 +200,10 @@ public class FrmConfig extends javax.swing.JFrame {
 
         jLabel13.setText("Kode Timbangan");
 
+        cbComPort.setToolTipText("");
+
+        jLabel15.setText("Port");
+
         javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
         jPanel4.setLayout(jPanel4Layout);
         jPanel4Layout.setHorizontalGroup(
@@ -202,8 +211,6 @@ public class FrmConfig extends javax.swing.JFrame {
             .addGroup(jPanel4Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtTitleAplikasi)
-                    .addComponent(jScrollPane2)
                     .addGroup(jPanel4Layout.createSequentialGroup()
                         .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(txtMinLengthQrCode, javax.swing.GroupLayout.DEFAULT_SIZE, 169, Short.MAX_VALUE)
@@ -216,19 +223,30 @@ public class FrmConfig extends javax.swing.JFrame {
                             .addGroup(jPanel4Layout.createSequentialGroup()
                                 .addComponent(btnOn)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(btnOff))
-                            .addComponent(jLabel32)
-                            .addComponent(txtRefreshRate))
+                                .addComponent(btnOff)))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                .addComponent(txtDelayOk, javax.swing.GroupLayout.DEFAULT_SIZE, 170, Short.MAX_VALUE)
-                                .addComponent(txtMinWeight))
-                            .addComponent(jLabel34)
-                            .addComponent(jLabel10)
-                            .addComponent(jLabel13)
-                            .addComponent(txtKodeTimbangan, javax.swing.GroupLayout.PREFERRED_SIZE, 169, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                            .addComponent(txtRefreshRate)
+                            .addGroup(jPanel4Layout.createSequentialGroup()
+                                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(jLabel34)
+                                    .addComponent(jLabel10)
+                                    .addComponent(jLabel32))
+                                .addGap(0, 42, Short.MAX_VALUE))
+                            .addComponent(txtDelayOk)
+                            .addComponent(txtMinWeight, javax.swing.GroupLayout.Alignment.TRAILING)))
+                    .addComponent(txtTitleAplikasi)
+                    .addComponent(jScrollPane2)
+                    .addGroup(jPanel4Layout.createSequentialGroup()
+                        .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(txtKodeTimbangan, javax.swing.GroupLayout.PREFERRED_SIZE, 169, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel13))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jPanel4Layout.createSequentialGroup()
+                                .addComponent(jLabel15)
+                                .addGap(0, 0, Short.MAX_VALUE))
+                            .addComponent(cbComPort, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
                 .addContainerGap())
         );
         jPanel4Layout.setVerticalGroup(
@@ -243,11 +261,14 @@ public class FrmConfig extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 69, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jLabel24)
+                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel24)
+                    .addComponent(jLabel32))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnOn)
-                    .addComponent(btnOff))
+                    .addComponent(btnOff)
+                    .addComponent(txtRefreshRate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addGroup(jPanel4Layout.createSequentialGroup()
@@ -268,11 +289,11 @@ public class FrmConfig extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel13)
-                    .addComponent(jLabel32))
+                    .addComponent(jLabel15))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(txtKodeTimbangan, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(txtRefreshRate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(cbComPort, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap())
         );
 
@@ -410,6 +431,7 @@ public class FrmConfig extends javax.swing.JFrame {
         JSONObject newConfig = new JSONObject();
         try {
             newConfig.put("title", txtTitleAplikasi.getText());
+            newConfig.put("comPort", cbComPort.getSelectedIndex());
             newConfig.put("kodeTimbangan", txtKodeTimbangan.getText());
             newConfig.put("accessToken", txtAccessToken.getText());
             newConfig.put("apiTimbangan", txtApiNilaiTimbangan.getText());
@@ -497,9 +519,11 @@ public class FrmConfig extends javax.swing.JFrame {
     private javax.swing.JToggleButton btnOff;
     private javax.swing.JButton btnOk;
     private javax.swing.JToggleButton btnOn;
+    public javax.swing.JComboBox<String> cbComPort;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel12;
     private javax.swing.JLabel jLabel13;
+    private javax.swing.JLabel jLabel15;
     private javax.swing.JLabel jLabel22;
     private javax.swing.JLabel jLabel23;
     private javax.swing.JLabel jLabel24;

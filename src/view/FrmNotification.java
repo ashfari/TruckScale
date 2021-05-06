@@ -66,7 +66,7 @@ public class FrmNotification extends javax.swing.JFrame {
     }
     
     private void timeout() {
-        frmMain.resetResultScan();
+//        frmMain.resetResultScan();
         timer.cancel();
         this.setVisible(false);
     }

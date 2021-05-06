@@ -13,6 +13,8 @@ import java.io.InputStreamReader;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JLabel;
+import javax.swing.JTextArea;
 import okhttp3.Response;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -44,9 +46,15 @@ public class ThreadScanner extends Thread {
     JSONObject jsonTruck = null;
     JSONObject jsonDriver = null;
     public String resultUpdateData = "";
+    JLabel titleText = null;
+    JTextArea resultTextArea = null;
+    int indexScanner = 0;
 
-    public ThreadScanner(FrmMain frmMain) {
+    public ThreadScanner(FrmMain frmMain, JLabel titleText, JTextArea resultTextArea, int indexScanner) {
         this.frmMain = frmMain;
+        this.titleText = titleText;
+        this.resultTextArea = resultTextArea;
+        this.indexScanner = indexScanner;
         createObjects();
     }
     
@@ -57,6 +65,7 @@ public class ThreadScanner extends Thread {
         sleepTime = 100;
         resetDelay();
         resetDelayNoScan();
+        this.resultTextArea.setText("Ready...");
     }
     
     private void implementConfig() {
@@ -89,24 +98,21 @@ public class ThreadScanner extends Thread {
             try {
                 frmMain.config = frmMain.configManager.readConfig();
                 frmMain.scanner = frmMain.scannerManager.readScanner();
-                implementConfig();
-                frmMain.setTabResults();
                 
                 if (frmMain.isDebugging.equals("true") && frmMain.manualQrCode.length() > 0) {
                     frmMain.scannerInput = frmMain.manualQrCode;
                 }
 
                 input = frmMain.scannerInput;
-                System.out.println(input);
                 
                 if (frmMain.isDebugging.equals("true") && input.length() > 0) {
                     System.out.println(input);
                 }
                 
                 if (input.length() >= Integer.parseInt(frmMain.config.get("minLengthQrCode").toString())) {
-                    frmMain.txtResultScan.setForeground(Color.BLACK);
-                    frmMain.txtResultScan.setText("Scanning...");
-                    delay--;
+                    this.resultTextArea.setForeground(Color.BLACK);
+                    this.resultTextArea.setText("Scanning...");
+                    this.delay--;
                     
                     if (!input.equals(prevInput)) {
                         prevInput = input;
@@ -115,7 +121,7 @@ public class ThreadScanner extends Thread {
                     if (delay <= 0) {
                         scannerParams.put("qrcode", input);
                         scannerParams.put("wb_id", frmMain.config.getString("kodeTimbangan"));
-                        scannerParams.put("track_name", frmMain.scanner[0][5].toString());
+                        scannerParams.put("track_name", frmMain.scanner[this.indexScanner][5].toString());
                         try {
                             result = frmMain.okHttpManager.sendPost(frmMain.config.get("apiQrCode").toString(), scannerParams, frmMain.authManager.readAuth());
                             showResult(result);
@@ -157,29 +163,34 @@ public class ThreadScanner extends Thread {
         }
     }
     
-    public void showResult(Response result) throws IOException, JSONException {
+    private void showResult(Response result) throws IOException, JSONException {
         resultJson = new JSONObject(result.body().string());
         
         if (result.isSuccessful()) {
-            frmMain.txtResultScan.setText("Success: QR Code Valid");
-            frmMain.txtResultScan.append("\n\n");
-            frmMain.txtResultScan.append("SO Number: " + resultJson.get("so_number").toString());
-            frmMain.txtResultScan.append("\n");
-            frmMain.txtResultScan.append("DO Number: " + resultJson.get("so_number").toString());
-            frmMain.txtResultScan.append("\n");
+            this.resultTextArea.setText("Success: QR Code Valid");
+            this.resultTextArea.append("\n\n");
+            this.resultTextArea.append("SO Number: " + resultJson.get("so_number").toString());
+            this.resultTextArea.append("\n");
+            this.resultTextArea.append("DO Number: " + resultJson.get("so_number").toString());
+            this.resultTextArea.append("\n");
             jsonArray = new JSONObject(resultJson.getJSONArray("trucks").get(0).toString());
             jsonArray = new JSONObject(jsonArray.getJSONArray("assignments").get(0).toString());
             jsonTruck = new JSONObject(jsonArray.getJSONArray("trucks").get(0).toString());
             jsonDriver = new JSONObject(jsonArray.getJSONArray("drivers").get(0).toString());
-            frmMain.txtResultScan.append("Truk: " + String.join(" ", jsonTruck.get("number_array").toString().replace("\"", "").replace("[", "").replace("]", "").split(",")));
-            frmMain.txtResultScan.append("\n");
-            frmMain.txtResultScan.append("Sopir: " + jsonDriver.getString("name"));
+            this.resultTextArea.append("Truk: " + String.join(" ", jsonTruck.get("number_array").toString().replace("\"", "").replace("[", "").replace("]", "").split(",")));
+            this.resultTextArea.append("\n");
+            this.resultTextArea.append("Sopir: " + jsonDriver.getString("name"));
 
-            new FrmUpdateTrack(input, frmMain).setVisible(true);
+            new FrmUpdateTrack(this.input, this.frmMain).setVisible(true);
             
         } else {
-            frmMain.txtResultScan.setForeground(Color.RED);
-            frmMain.txtResultScan.setText("Gagal: QR Code tidak valid (" + resultJson.get("message").toString() + ")");
+            this.resultTextArea.setForeground(Color.RED);
+            this.resultTextArea.setText("Gagal: QR Code tidak valid (" + resultJson.get("message").toString() + ")");
         }
+    }
+    
+    private void resetResultScan() {
+        this.resultTextArea.setForeground(Color.BLACK);
+        this.resultTextArea.setText("Ready...");
     }
 }

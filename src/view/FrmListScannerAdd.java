@@ -125,6 +125,7 @@ public class FrmListScannerAdd extends javax.swing.JFrame {
         jLabel1.setText("Tipe Scanner");
 
         scannerAddType.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Serial Based", "IP Based" }));
+        scannerAddType.setSelectedIndex(1);
         scannerAddType.setToolTipText("");
         scannerAddType.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -346,7 +347,7 @@ public class FrmListScannerAdd extends javax.swing.JFrame {
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new FrmListScanner().setVisible(true);
+                new FrmListScanner(new FrmMain()).setVisible(true);
             }
         });
     }

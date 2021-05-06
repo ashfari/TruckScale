@@ -47,6 +47,7 @@ public class ConfigManager {
 //        Config JSON
         JSONObject config = new JSONObject();
         config.put("title", "Truck Scale");
+        config.put("comPort", "0");
         config.put("kodeTimbangan", "1");
         config.put("accessToken", "");
         config.put("apiTimbangan", "http://localhost:8000/api/weigh-bridge/scans");
@@ -61,7 +62,7 @@ public class ConfigManager {
         config.put("clientId", "");
         config.put("clientSecret", "");
         config.put("apiRequestToken", "http://localhost:8000/oauth/token");
-        config.put("apiAccountInfo", "http://localhost:8000/customer/v1");
+        config.put("apiAccountInfo", "http://localhost:8000/api/customer/v1");
         
 //        Write file
         try (FileWriter file = new FileWriter("./config")) {

@@ -14,7 +14,6 @@ import java.util.logging.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
 import view.FrmConfig;
-import view.FrmListScannerAdd;
 import view.FrmMain;
 
 /**
@@ -24,30 +23,30 @@ import view.FrmMain;
 public class SerialPortManager {
     
     FrmMain window = null;
-    FrmListScannerAdd frmListScannerAdd = null;
+    FrmConfig windowConfig = null;
     String message = "";
     String messages[] = null;
     JSONObject weight = null;
     SerialPort comPort = null;
     SerialPort[] comPorts = null;
-    ScannerManager scannerManager = null;
-    public Object[][] scanner = null;
+    ConfigManager configManager = null;
+    public JSONObject config = new JSONObject();
 
     public SerialPortManager() {
     }
 
-    public SerialPortManager(FrmListScannerAdd frmListScannerAdd) {
-        this.frmListScannerAdd = frmListScannerAdd;
+    public SerialPortManager(FrmConfig windowConfig) {
+        this.windowConfig = windowConfig;
     }
     
     public SerialPortManager(FrmMain window) throws JSONException, FileNotFoundException {
         this.window = window;
-        this.scannerManager = new ScannerManager();
-        this.scanner = scannerManager.getScanner();
+        this.configManager = new ConfigManager();
+        this.config = configManager.getConfig();
     }
     
     public void getWeight() throws JSONException {
-        comPort = SerialPort.getCommPorts()[Integer.parseInt(this.scanner[1][4].toString())];
+        comPort = SerialPort.getCommPorts()[Integer.parseInt(this.config.get("comPort").toString())];
         comPort.openPort();
         comPort.addDataListener(new SerialPortDataListener() {
             @Override
@@ -87,7 +86,7 @@ public class SerialPortManager {
         comPorts = SerialPort.getCommPorts();
         
         for (int i = 0; i < comPorts.length; i++) {
-            frmListScannerAdd.cbComPort.addItem(comPorts[i].getDescriptivePortName());
+            windowConfig.cbComPort.addItem(comPorts[i].getDescriptivePortName());
         }
     }
 }

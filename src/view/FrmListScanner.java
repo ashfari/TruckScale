@@ -26,14 +26,17 @@ public class FrmListScanner extends javax.swing.JFrame {
     public DefaultTableModel model = null;
     public String[] columns = null;
     public Class[] columnClass = null;
+    FrmMain frmMain = null;
 
     /**
      * Creates new form FrmListScannerIpBased
      */
-    public FrmListScanner() {
+    public FrmListScanner(FrmMain frmMain) {
         this.setUndecorated(true);
         initComponents();
         this.setLocationRelativeTo(null);
+        
+        this.frmMain = frmMain;
         
         createObjects();
     }
@@ -233,6 +236,9 @@ public class FrmListScanner extends javax.swing.JFrame {
         
         this.scanner = this.scannerManager.updateScanner(newScanner);
         
+        this.frmMain.scannerFromSetting = newScanner;
+        this.frmMain.setTabResults();
+        
         this.setVisible(false);
     }//GEN-LAST:event_listScannerOkActionPerformed
 
@@ -267,7 +273,7 @@ public class FrmListScanner extends javax.swing.JFrame {
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new FrmListScanner().setVisible(true);
+                new FrmListScanner(new FrmMain()).setVisible(true);
             }
         });
     }
