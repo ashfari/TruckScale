@@ -7,6 +7,8 @@ package view;
 
 import controller.ScannerManager;
 import java.io.FileNotFoundException;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.table.DefaultTableModel;
@@ -27,6 +29,8 @@ public class FrmListScanner extends javax.swing.JFrame {
     public String[] columns = null;
     public Class[] columnClass = null;
     FrmMain frmMain = null;
+    int counter = 0;
+    Timer timer = null;
 
     /**
      * Creates new form FrmListScannerIpBased
@@ -44,6 +48,8 @@ public class FrmListScanner extends javax.swing.JFrame {
     private void createObjects() {
         this.scannerManager = new ScannerManager();
         this.fillTable();
+        this.timer = new Timer();
+        this.counter = 2;
     }
     
     private void fillTable() {
@@ -175,7 +181,7 @@ public class FrmListScanner extends javax.swing.JFrame {
                     .addContainerGap()))
         );
 
-        listScannerOk.setText("OK");
+        listScannerOk.setText("Simpan");
         listScannerOk.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 listScannerOkActionPerformed(evt);
@@ -237,11 +243,29 @@ public class FrmListScanner extends javax.swing.JFrame {
         this.scanner = this.scannerManager.updateScanner(newScanner);
         
         this.frmMain.scannerFromSetting = newScanner;
-        this.frmMain.setTabResults();
+        this.frmMain.isRestart = true;
         
-        this.setVisible(false);
+        this.pleaseWait();
     }//GEN-LAST:event_listScannerOkActionPerformed
 
+    public void pleaseWait() {
+        timer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                counter--;
+                if (counter < 0) {
+                    resetTabResults();
+                }
+            }
+        }, 0, 1000);
+    }
+    
+    public void resetTabResults() {
+        this.timer.cancel();
+        this.frmMain.setTabResults();
+        this.setVisible(false);
+    }
+    
     /**
      * @param args the command line arguments
      */

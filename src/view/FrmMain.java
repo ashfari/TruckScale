@@ -13,6 +13,7 @@ import controller.SerialPortManager;
 import controller.ConfigManager;
 import controller.OkHttpManager;
 import controller.PasswordManager;
+import controller.ScannerIpBasedManager;
 import controller.ScannerManager;
 import controller.ThreadMain;
 import controller.ThreadScannerIpBased;
@@ -40,8 +41,11 @@ import javax.swing.JSeparator;
 import javax.swing.JTextArea;
 import javax.swing.SpringLayout;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import okhttp3.Response;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -73,6 +77,9 @@ public class FrmMain extends javax.swing.JFrame {
     public Object[][] scannerFromSetting = null;
     Response result = null;
     JPopupMenu menu;
+    int indexScannerShow = 0;
+    public boolean isRestart = false;
+    public FrmMain frmMain = null;
 
     /**
      * Creates new form FrmMain
@@ -115,9 +122,11 @@ public class FrmMain extends javax.swing.JFrame {
                 this.auth = new JSONObject(result.body().string());
                 btnUser.setText(this.auth.getString("name"));
             } else {
-                this.authManager.deleteAuth();
-                this.setVisible(false);
-                new FrmLogin().setVisible(true);
+                int dialogResult = JOptionPane.showConfirmDialog(this, "Anda tidak memiliki izin autentikasi! Apakah anda ingin Login?");
+                if(dialogResult == JOptionPane.YES_OPTION){
+                    this.logout();
+                    return;
+                }
             }
         } catch (JSONException ex) {
             Logger.getLogger(FrmMain.class.getName()).log(Level.SEVERE, null, ex);
@@ -136,11 +145,14 @@ public class FrmMain extends javax.swing.JFrame {
         }
 //        this.threadScannerIpBased = new ThreadScannerIpBased(this, "127.0.0.1", 23);
         this.serialPortManager = new SerialPortManager();
-        
+        frmMain = this;
+
         this.setTabResults();
     }
     
     public void setTabResults() {
+        this.indexScannerShow = 0;
+        this.isRestart = false;
         tabResult.removeAll();
         if (this.scannerFromSetting != null) {
             this.scanner = this.scannerFromSetting;
@@ -148,102 +160,123 @@ public class FrmMain extends javax.swing.JFrame {
         }
         for (int i = 0; i < this.scanner.length; i++) {
             if (this.scanner[i][7].toString().equals("true")) {
-                tabResult.addTab(this.scanner[i][1].toString(), this.createNewPanelResult(i));
+                tabResult.addTab(this.scanner[i][1].toString(), this.createNewPanelResult(i, this.indexScannerShow));
+                this.indexScannerShow++;
             }
         }
+        tabResult.addChangeListener(new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                if (tabResult.getSelectedIndex() >= 0) {
+                    tabResult.setForegroundAt(tabResult.getSelectedIndex(), Color.black);
+                }
+            }
+        });
     }
     
-    public void tabNotify(int indexScanner) {
-        tabResult.setForegroundAt(indexScanner, Color.RED);
+    public void tabNotify(int indexScannerShow) {
+        if (tabResult.getSelectedIndex() != indexScannerShow) {
+            tabResult.setForegroundAt(indexScannerShow, Color.RED);
+        }
     }
     
-    private JPanel createNewPanelResult(int indexScanner) {
+    private JPanel createNewPanelResult(int indexScanner, int indexScannerShow) {
         JPanel panel = new JPanel();
-        JLabel title = new JLabel("QR Code Scan");
-        JSeparator separator = new JSeparator();
-        JSeparator separatorBottom = new JSeparator();
-        JTextArea result = new JTextArea("");
-        JScrollPane scrollPane = new JScrollPane(result);
-        JLabel statusProcess = new JLabel("Status Proses");
-        JPanel buttonGroup = new JPanel();
-        JButton doneProcess = new JButton("OK");
-        JButton cancelProcess = new JButton("Cancel");
-        
-        SpringLayout layout = new SpringLayout();
-        panel.setLayout(layout);
-        
-        buttonGroup.setLayout(new FlowLayout());
-        
-        panel.add(title);
-        panel.add(separator);
-        panel.add(scrollPane);
-        panel.add(separatorBottom);
-        panel.add(statusProcess);
-        panel.add(buttonGroup);
-        
-        buttonGroup.add(doneProcess);
-        buttonGroup.add(cancelProcess);
-        
-        panel.setBackground(Color.white);
-        panel.setBorder(new EmptyBorder(10, 10, 10, 10));
-        
-        buttonGroup.setBackground(Color.white);
-        buttonGroup.setBorder(new EmptyBorder(0, 0, 0, 0));
-        
-        layout.putConstraint(SpringLayout.NORTH, title, 0, SpringLayout.NORTH, panel);
-        layout.putConstraint(SpringLayout.WEST, title, 0, SpringLayout.WEST, panel);
-        layout.putConstraint(SpringLayout.EAST, title, 0, SpringLayout.EAST, panel);
-        layout.putConstraint(SpringLayout.NORTH, separator, 11, SpringLayout.SOUTH, title);
-        layout.putConstraint(SpringLayout.WEST, separator, 0, SpringLayout.WEST, panel);
-        layout.putConstraint(SpringLayout.EAST, separator, 0, SpringLayout.EAST, panel);
-        layout.putConstraint(SpringLayout.NORTH, result, 0, SpringLayout.NORTH, scrollPane);
-        layout.putConstraint(SpringLayout.EAST, result, 0, SpringLayout.EAST, scrollPane);
-        layout.putConstraint(SpringLayout.WEST, result, 0, SpringLayout.WEST, scrollPane);
-        layout.putConstraint(SpringLayout.SOUTH, result, 0, SpringLayout.SOUTH, scrollPane);
-        layout.putConstraint(SpringLayout.NORTH, scrollPane, 0, SpringLayout.SOUTH, separator);
-        layout.putConstraint(SpringLayout.WEST, scrollPane, 0, SpringLayout.WEST, panel);
-        layout.putConstraint(SpringLayout.EAST, scrollPane, 0, SpringLayout.EAST, panel);
-        layout.putConstraint(SpringLayout.SOUTH, scrollPane, 0, SpringLayout.NORTH, separatorBottom);
-        layout.putConstraint(SpringLayout.WEST, separatorBottom, 0, SpringLayout.WEST, panel);
-        layout.putConstraint(SpringLayout.EAST, separatorBottom, 0, SpringLayout.EAST, panel);
-        layout.putConstraint(SpringLayout.SOUTH, separatorBottom, 0, SpringLayout.NORTH, statusProcess);
-        layout.putConstraint(SpringLayout.WEST, statusProcess, 0, SpringLayout.WEST, panel);
-        layout.putConstraint(SpringLayout.EAST, statusProcess, 0, SpringLayout.EAST, panel);
-        layout.putConstraint(SpringLayout.SOUTH, statusProcess, 0, SpringLayout.NORTH, buttonGroup);
-        layout.putConstraint(SpringLayout.WEST, buttonGroup, 0, SpringLayout.WEST, panel);
-        layout.putConstraint(SpringLayout.EAST, buttonGroup, 0, SpringLayout.EAST, panel);
-        layout.putConstraint(SpringLayout.SOUTH, buttonGroup, 0, SpringLayout.SOUTH, panel);
-        
-        title.setFont(new java.awt.Font("Monospaced", 1, 18));
-        title.setHorizontalAlignment(SwingConstants.CENTER);
-        
-        separator.setOrientation(SwingConstants.HORIZONTAL);
-        separatorBottom.setOrientation(SwingConstants.HORIZONTAL);
-        
-        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-        scrollPane.setBorder(new EmptyBorder(10, 0, 0, 0));
-        scrollPane.setBackground(Color.white);
-        
-        result.setEditable(false);
-        result.setFont(new java.awt.Font("Monospaced", 0, 18)); // NOI18N
-        result.setLineWrap(true);
-        result.setWrapStyleWord(true);
-        
-        statusProcess.setHorizontalAlignment(SwingConstants.CENTER);
-        
-        doneProcess.setEnabled(false);
-        cancelProcess.setEnabled(false);
+//        JLabel title = new JLabel("QR Code Scan");
+//        JSeparator separator = new JSeparator();
+//        JSeparator separatorBottom = new JSeparator();
+//        JTextArea result = new JTextArea("");
+//        JScrollPane scrollPane = new JScrollPane(result);
+//        JLabel statusProcess = new JLabel("Status Proses");
+//        JPanel buttonGroup = new JPanel();
+//        JButton doneProcess = new JButton("OK");
+//        JButton cancelProcess = new JButton("Cancel");
+//        
+//        SpringLayout layout = new SpringLayout();
+//        panel.setLayout(layout);
+//        
+//        buttonGroup.setLayout(new FlowLayout());
+//        
+//        panel.add(title);
+//        panel.add(separator);
+//        panel.add(scrollPane);
+//        panel.add(separatorBottom);
+//        panel.add(statusProcess);
+//        panel.add(buttonGroup);
+//        
+//        buttonGroup.add(doneProcess);
+//        buttonGroup.add(cancelProcess);
+//        
+//        panel.setBackground(Color.white);
+//        panel.setBorder(new EmptyBorder(10, 10, 10, 10));
+//        
+//        buttonGroup.setBackground(Color.white);
+//        buttonGroup.setBorder(new EmptyBorder(0, 0, 0, 0));
+//        
+//        layout.putConstraint(SpringLayout.NORTH, title, 0, SpringLayout.NORTH, panel);
+//        layout.putConstraint(SpringLayout.WEST, title, 0, SpringLayout.WEST, panel);
+//        layout.putConstraint(SpringLayout.EAST, title, 0, SpringLayout.EAST, panel);
+//        layout.putConstraint(SpringLayout.NORTH, separator, 11, SpringLayout.SOUTH, title);
+//        layout.putConstraint(SpringLayout.WEST, separator, 0, SpringLayout.WEST, panel);
+//        layout.putConstraint(SpringLayout.EAST, separator, 0, SpringLayout.EAST, panel);
+//        layout.putConstraint(SpringLayout.NORTH, result, 0, SpringLayout.NORTH, scrollPane);
+//        layout.putConstraint(SpringLayout.EAST, result, 0, SpringLayout.EAST, scrollPane);
+//        layout.putConstraint(SpringLayout.WEST, result, 0, SpringLayout.WEST, scrollPane);
+//        layout.putConstraint(SpringLayout.SOUTH, result, 0, SpringLayout.SOUTH, scrollPane);
+//        layout.putConstraint(SpringLayout.NORTH, scrollPane, 0, SpringLayout.SOUTH, separator);
+//        layout.putConstraint(SpringLayout.WEST, scrollPane, 0, SpringLayout.WEST, panel);
+//        layout.putConstraint(SpringLayout.EAST, scrollPane, 0, SpringLayout.EAST, panel);
+//        layout.putConstraint(SpringLayout.SOUTH, scrollPane, 0, SpringLayout.NORTH, separatorBottom);
+//        layout.putConstraint(SpringLayout.WEST, separatorBottom, 0, SpringLayout.WEST, panel);
+//        layout.putConstraint(SpringLayout.EAST, separatorBottom, 0, SpringLayout.EAST, panel);
+//        layout.putConstraint(SpringLayout.SOUTH, separatorBottom, 0, SpringLayout.NORTH, statusProcess);
+//        layout.putConstraint(SpringLayout.WEST, statusProcess, 0, SpringLayout.WEST, panel);
+//        layout.putConstraint(SpringLayout.EAST, statusProcess, 0, SpringLayout.EAST, panel);
+//        layout.putConstraint(SpringLayout.SOUTH, statusProcess, 0, SpringLayout.NORTH, buttonGroup);
+//        layout.putConstraint(SpringLayout.WEST, buttonGroup, 0, SpringLayout.WEST, panel);
+//        layout.putConstraint(SpringLayout.EAST, buttonGroup, 0, SpringLayout.EAST, panel);
+//        layout.putConstraint(SpringLayout.SOUTH, buttonGroup, 0, SpringLayout.SOUTH, panel);
+//        
+//        title.setFont(new java.awt.Font("Monospaced", 1, 18));
+//        title.setHorizontalAlignment(SwingConstants.CENTER);
+//        
+//        separator.setOrientation(SwingConstants.HORIZONTAL);
+//        separatorBottom.setOrientation(SwingConstants.HORIZONTAL);
+//        
+//        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+//        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+//        scrollPane.setBorder(new EmptyBorder(10, 0, 0, 0));
+//        scrollPane.setBackground(Color.white);
+//        
+//        result.setEditable(false);
+//        result.setFont(new java.awt.Font("Monospaced", 0, 18)); // NOI18N
+//        result.setLineWrap(true);
+//        result.setWrapStyleWord(true);
+//        
+//        statusProcess.setHorizontalAlignment(SwingConstants.CENTER);
+//        
+//        doneProcess.setEnabled(false);
+//        cancelProcess.setEnabled(false);
         
 //        Create result thread
-        if (this.scanner[indexScanner][2].toString().equals("IP Based")) {
-            this.threadScannerIpBased = new ThreadScannerIpBased(this, 
-                title, result, statusProcess, doneProcess, cancelProcess, indexScanner);
-            this.threadScannerIpBased.start();
-        } else {
-            this.threadScanner = new ThreadScanner(this, title, result, indexScanner);
-            this.threadScanner.start();
-        }
+//        if (this.scanner[indexScanner][2].toString().equals("IP Based")) {
+//            this.threadScannerIpBased = new ThreadScannerIpBased(this, 
+//                title, result, statusProcess, doneProcess, cancelProcess, indexScanner, indexScannerShow);
+//            this.threadScannerIpBased.start();
+//        } else {
+//            this.threadScanner = new ThreadScanner(this, title, result, indexScanner, indexScannerShow);
+//            this.threadScanner.start();
+//        }
+//        
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                new ScannerIpBasedManager(frmMain, panel, 
+                        scanner[indexScanner][3].toString(), 
+                        Integer.parseInt(scanner[indexScanner][4].toString()),
+                        indexScanner, indexScannerShow
+                );
+            }
+        });
         
         return panel;
     }
@@ -312,6 +345,16 @@ public class FrmMain extends javax.swing.JFrame {
         }
     }
     
+    public void logout() {
+        if (this.authManager.deleteAuth()) {
+            this.setVisible(false);
+            JOptionPane.showMessageDialog(this, "Logout success!", "Logout", JOptionPane.INFORMATION_MESSAGE);
+            new FrmLogin().setVisible(true);
+        } else {
+            JOptionPane.showMessageDialog(this, "Logout failed!", "Logout", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -340,6 +383,7 @@ public class FrmMain extends javax.swing.JFrame {
         jLabel1 = new javax.swing.JLabel();
         last_sent = new javax.swing.JLabel();
         jPanel8 = new javax.swing.JPanel();
+        UIManager.put("TabbedPane.selectedForeground", Color.black);
         tabResult = new javax.swing.JTabbedPane();
         btn_qrcode = new javax.swing.JButton();
         btnUser = new javax.swing.JButton();
@@ -623,13 +667,7 @@ public class FrmMain extends javax.swing.JFrame {
     }//GEN-LAST:event_btnUserActionPerformed
 
     private void menuItemLogoutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuItemLogoutActionPerformed
-        if (this.authManager.deleteAuth()) {
-            this.setVisible(false);
-            JOptionPane.showMessageDialog(this, "Logout success!", "Logout", JOptionPane.INFORMATION_MESSAGE);
-            new FrmLogin().setVisible(true);
-        } else {
-            JOptionPane.showMessageDialog(this, "Logout failed!", "Logout", JOptionPane.ERROR_MESSAGE);
-        }
+        this.logout();
     }//GEN-LAST:event_menuItemLogoutActionPerformed
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed

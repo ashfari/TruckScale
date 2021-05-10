@@ -18,7 +18,6 @@ import org.apache.commons.net.telnet.TelnetClient;
 public class ThreadScannerIpBasedGetInput extends Thread {
     private Thread reader;
     private String threadName = "Thread Scanner IP Based";
-    boolean isRunning;
     String ip = "";
     int port = 0;
     TelnetClient tc = null;
@@ -27,6 +26,7 @@ public class ThreadScannerIpBasedGetInput extends Thread {
     int ret_read = 0;
     int indexScanner = 0;
     ThreadScannerIpBased threadScannerIpBased = null;
+    String scannerBuffer = "";
     
     public ThreadScannerIpBasedGetInput(ThreadScannerIpBased threadScannerIpBased, String ip, int port) {
         this.threadScannerIpBased = threadScannerIpBased;
@@ -49,31 +49,26 @@ public class ThreadScannerIpBasedGetInput extends Thread {
     {
         this.buff = new byte[1024];
         this.ret_read = 0;
-        this.isRunning = true;
-        while (this.isRunning) {
+        while (!this.threadScannerIpBased.frmMain.isRestart) {
             this.instr = this.tc.getInputStream();
             try {
                 this.ret_read = this.instr.read(this.buff);
                 if (this.ret_read > 0) {
-                    this.threadScannerIpBased.scannerInput += new String(this.buff, 0, this.ret_read);
+                    this.scannerBuffer = (new String(this.buff, 0, this.ret_read)).replaceAll("\\r\\n", "");
+                    if (!this.scannerBuffer.equals("")) {
+                        this.threadScannerIpBased.scannerInput += this.scannerBuffer;
+                    }
                 }
             } catch (Exception e) {
-                System.err.println("Exception while reading socket:" + e.getMessage());
+                if (this.threadScannerIpBased.frmMain.isDebugging.equals("true")) {
+                    System.err.println("Exception while reading socket:" + e.getMessage());
+                }
             }
-
-//            try {
-//                this.tc.disconnect();
-//            }
-//            catch (Exception e) {
-//                System.err.println("Exception while closing telnet:" + e.getMessage());
-//            }
         }
-    }
-    
-    public void start() {
-        if (this.reader == null) {
-            this.reader = new Thread(this, this.threadName);
-            this.reader.start();
+        try {
+            this.tc.disconnect();
+        } catch (IOException ex) {
         }
+        stop();
     }
 }

@@ -6,19 +6,17 @@
 package controller;
 
 import java.awt.Color;
-import java.io.InputStream;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JTextArea;
+import javax.swing.SwingUtilities;
 import okhttp3.Response;
-import org.apache.commons.net.telnet.TelnetClient;
 import org.json.JSONException;
 import org.json.JSONObject;
 import view.FrmMain;
-import view.FrmUpdateTrack;
 
 /**
  *
@@ -27,7 +25,6 @@ import view.FrmUpdateTrack;
 public class ThreadScannerIpBased extends Thread {
     private Thread reader;
     private String threadName = "Thread Scanner IP Based";
-    boolean isRunning;
     FrmMain frmMain = null;
     String ip = "";
     int port = 0;
@@ -48,12 +45,13 @@ public class ThreadScannerIpBased extends Thread {
     JButton nextProcess = null; 
     JButton cancelProcess = null;
     int indexScanner = 0;
+    int indexScannerShow = 0;
     public String scannerInput = "";
     ThreadScannerIpBasedGetInput threadScannerIpBasedGetInput = null;
     
     public ThreadScannerIpBased(FrmMain frmMain, JLabel titleText, 
             JTextArea resultTextArea, JLabel statusProcess, JButton nextProcess, 
-            JButton cancelProcess, int indexScanner) {
+            JButton cancelProcess, int indexScanner, int indexScannerShow) {
         this.frmMain = frmMain;
         this.titleText = titleText;
         this.statusProcess = statusProcess;
@@ -61,6 +59,7 @@ public class ThreadScannerIpBased extends Thread {
         this.cancelProcess = cancelProcess;
         this.resultTextArea = resultTextArea;
         this.indexScanner = indexScanner;
+        this.indexScannerShow = indexScannerShow;
         
         createObjects();
     }
@@ -75,23 +74,30 @@ public class ThreadScannerIpBased extends Thread {
         resetDelay();
         resetDelayNoScan();
         this.resultTextArea.setText("Ready...");
+//        this.updateSwing();
     }
     
     public void run()
     {
-        this.isRunning = true;
-        while (this.isRunning) {
+        while (!this.frmMain.isRestart) {
             try {
                 this.input = this.scannerInput;
                 
+                System.out.println("inputan : " + this.input);
+                
                 if (this.frmMain.isDebugging.equals("true") && this.input.length() > 0) {
-                    System.out.println(this.input);
+                    if (this.input.length() >= Integer.parseInt(this.frmMain.config.get("minLengthQrCode").toString())) {
+                        
+                    } else {
+                        System.out.println("input scanner tidak melebihi minimal qrcode character length");
+                    }
                 }
 
                 if (this.input.length() >= Integer.parseInt(this.frmMain.config.get("minLengthQrCode").toString())) {
                     this.resultTextArea.setForeground(Color.BLACK);
                     this.resultTextArea.setText("Scanning...");
-                    this.frmMain.tabNotify(this.indexScanner);
+                    System.out.println(this.resultTextArea.getText());
+                    this.frmMain.tabNotify(this.indexScannerShow);
                     this.delay--;
 
                     if (!this.input.equals(this.prevInput)) {
@@ -99,13 +105,18 @@ public class ThreadScannerIpBased extends Thread {
                         resetDelay();
                     }
 
-                    if (delay <= 0) {
-                        this.scannerParams.put("qrcode", this.input);
+                    if (delay == 0) {
+                        System.out.println("delay done : " + delay);
+                        this.scannerParams.put("qrcode", this.input.replaceAll("\\r\\n", ""));
                         this.scannerParams.put("wb_id", this.frmMain.config.getString("kodeTimbangan"));
                         this.scannerParams.put("track_name", this.frmMain.scanner[this.indexScanner][5].toString());
                         try {
-                            this.result = this.frmMain.okHttpManager.sendPost(this.frmMain.config.get("apiQrCode").toString(), scannerParams, frmMain.authManager.readAuth());
-                            showResult(result);
+                            System.out.println("send post request" + this.input);
+                            System.out.println(this.scannerParams);
+                            System.out.println(this.frmMain.config.get("apiQrCode").toString());
+                            System.out.println(this.frmMain.config.get("accessToken").toString());
+                            this.result = this.frmMain.okHttpManager.sendPost(this.frmMain.config.get("apiQrCode").toString(), this.scannerParams, this.frmMain.authManager.readAuth());
+                            showResult(this.result);
                             this.scannerInput = "";
                             resetDelay();
                         } catch (Exception ex) {
@@ -126,24 +137,22 @@ public class ThreadScannerIpBased extends Thread {
 
                 // Let the thread sleep for a while.
                 Thread.sleep(this.sleepTime);
-            } catch (Exception e) {
-                System.err.println("Exception while reading socket:" + e.getMessage());
+            } catch (JSONException ex) {
+                Logger.getLogger(ThreadScannerIpBased.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (InterruptedException ex) {
+                Logger.getLogger(ThreadScannerIpBased.class.getName()).log(Level.SEVERE, null, ex);
             }
-
-//            try {
-//                this.tc.disconnect();
-//            }
-//            catch (Exception e) {
-//                System.err.println("Exception while closing telnet:" + e.getMessage());
-//            }
         }
+        stop();
     }
     
-    public void start() {
-        if (this.reader == null) {
-            this.reader = new Thread(this, this.threadName);
-            this.reader.start();
-        }
+    public void updateSwing() {
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                resultTextArea.setText("Scanning...");
+            }
+        });
     }
     
     private void resetDelay() {
@@ -182,6 +191,7 @@ public class ThreadScannerIpBased extends Thread {
             
         } else {
             this.resultTextArea.setForeground(Color.RED);
+            System.out.println("Gagal: QR Code tidak valid (" + this.resultJson.get("message").toString() + ")");
             this.resultTextArea.setText("Gagal: QR Code tidak valid (" + this.resultJson.get("message").toString() + ")");
         }
     }

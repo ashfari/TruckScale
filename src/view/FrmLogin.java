@@ -33,6 +33,7 @@ public class FrmLogin extends javax.swing.JFrame {
     OkHttpManager okHttpManager = null;
     AuthManager authManager = null;
     String token = "";
+    JSONObject apiResponseJson = null;
     
     /**
      * Creates new form FrmLogin
@@ -59,6 +60,7 @@ public class FrmLogin extends javax.swing.JFrame {
         this.params = new JSONObject();
         this.okHttpManager = new OkHttpManager();
         this.authManager = new AuthManager();
+        this.apiResponseJson = new JSONObject();
         
 //        try {
 //            token = authManager.readAuth();
@@ -77,12 +79,15 @@ public class FrmLogin extends javax.swing.JFrame {
                 params.put("username", loginUsername.getText());
                 params.put("password", loginPassword.getText());
                 params.put("provider", "customers");
+                System.out.println(params);
                 apiResponse = okHttpManager.sendPostTokenRequest(config.get("apiRequestToken").toString(), params);
                 if (apiResponse.isSuccessful()) {
-                    this.token = new JSONObject(apiResponse.body().string()).getString("access_token");
+                    this.apiResponseJson = new JSONObject(apiResponse.body().string());
+                    this.token = this.apiResponseJson.getString("access_token");
                     this.authManager.createAuth(this.token);
                     login();
                 } else {
+                    System.out.println(apiResponse.body().string());
                     JOptionPane.showMessageDialog(this, "Gagal login ("
                             + new JSONObject(apiResponse.body().string()).getString("message")
                             + ")");

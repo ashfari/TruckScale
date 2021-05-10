@@ -29,7 +29,6 @@ public class ThreadScanner extends Thread {
 
     private Thread t;
     private String threadName = "Thread Scanner";
-    private boolean isRunning;
     JSONObject scannerParams = null;
     boolean isReading = false;
     int sleepTime = 0;
@@ -49,12 +48,15 @@ public class ThreadScanner extends Thread {
     JLabel titleText = null;
     JTextArea resultTextArea = null;
     int indexScanner = 0;
+    int indexScannerShow = 0;
 
-    public ThreadScanner(FrmMain frmMain, JLabel titleText, JTextArea resultTextArea, int indexScanner) {
+    public ThreadScanner(FrmMain frmMain, JLabel titleText, 
+            JTextArea resultTextArea, int indexScanner, int indexScannerShow) {
         this.frmMain = frmMain;
         this.titleText = titleText;
         this.resultTextArea = resultTextArea;
         this.indexScanner = indexScanner;
+        
         createObjects();
     }
     
@@ -93,8 +95,7 @@ public class ThreadScanner extends Thread {
     }
 
     public void run() {
-        isRunning = true;
-        while (isRunning) {
+        while (!this.frmMain.isRestart) {
             try {
                 frmMain.config = frmMain.configManager.readConfig();
                 frmMain.scanner = frmMain.scannerManager.readScanner();
@@ -112,6 +113,7 @@ public class ThreadScanner extends Thread {
                 if (input.length() >= Integer.parseInt(frmMain.config.get("minLengthQrCode").toString())) {
                     this.resultTextArea.setForeground(Color.BLACK);
                     this.resultTextArea.setText("Scanning...");
+                    this.frmMain.tabNotify(this.indexScannerShow);
                     this.delay--;
                     
                     if (!input.equals(prevInput)) {
@@ -154,13 +156,7 @@ public class ThreadScanner extends Thread {
                 Logger.getLogger(ThreadScanner.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
-    }
-
-    public void start() {
-        if (t == null) {
-            t = new Thread(this, threadName);
-            t.start();
-        }
+        stop();
     }
     
     private void showResult(Response result) throws IOException, JSONException {

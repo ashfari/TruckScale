@@ -88,7 +88,7 @@ public class AuthManager {
         }
         scanner.close();
         String decryptedToken = decrypt(data, secretCode) ;
-        return decryptedToken;
+        return data;
     }
 
     public void createAuth(String token) {
@@ -98,7 +98,7 @@ public class AuthManager {
         if (!file.exists()) {
             //        Write file
             try (FileWriter newFile = new FileWriter("./auth")) {
-                newFile.write(encryptedToken);
+                newFile.write(token);
                 newFile.flush();
             } catch (IOException e) {
                 e.printStackTrace();

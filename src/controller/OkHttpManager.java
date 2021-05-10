@@ -30,6 +30,8 @@ public class OkHttpManager {
                 .addHeader("Content-Type", "application/json")
                 .addHeader("Accept", "application/json");
         
+        System.out.println("token : " + token);
+        
         if (token != null) {
             requestBuilder.addHeader("Authorization", "Bearer " + token);
         }
