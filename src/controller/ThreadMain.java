@@ -64,6 +64,14 @@ public class ThreadMain extends Thread {
             try {
                 this.frmMain.config = this.frmMain.configManager.readConfig();
                 implementConfig();
+                if (this.frmMain.config.getString("isActiveWeighBridge").equals("false")) {
+                    frmMain.leftPanel.setVisible(false);
+                    frmMain.splitPaneMain.setDividerSize(0);
+                } else {
+                    frmMain.leftPanel.setVisible(true);
+                    frmMain.splitPaneMain.setDividerLocation(390);
+                    frmMain.splitPaneMain.setDividerSize(5);
+                }
                 // Let the thread sleep for a while.
                 Thread.sleep(sleepTime);
             } catch (JSONException ex) {

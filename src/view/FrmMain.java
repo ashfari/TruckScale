@@ -299,15 +299,15 @@ public class FrmMain extends javax.swing.JFrame {
         refreshRateLabel = new javax.swing.JLabel();
         labelRefresh = new javax.swing.JLabel();
         btnExit = new javax.swing.JButton();
-        jSplitPane1 = new javax.swing.JSplitPane();
-        jPanel7 = new javax.swing.JPanel();
+        splitPaneMain = new javax.swing.JSplitPane();
+        leftPanel = new javax.swing.JPanel();
         jPanel6 = new javax.swing.JPanel();
         weightValue = new javax.swing.JLabel();
         weightUnit = new javax.swing.JLabel();
         jPanel2 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
         last_sent = new javax.swing.JLabel();
-        jPanel8 = new javax.swing.JPanel();
+        rightPanel = new javax.swing.JPanel();
         UIManager.put("TabbedPane.selectedForeground", Color.black);
         tabResult = new javax.swing.JTabbedPane();
         btnQrcode = new javax.swing.JButton();
@@ -398,7 +398,7 @@ public class FrmMain extends javax.swing.JFrame {
             }
         });
 
-        jSplitPane1.setDividerLocation(390);
+        splitPaneMain.setDividerLocation(390);
 
         jPanel6.setBackground(new java.awt.Color(153, 204, 255));
         jPanel6.setPreferredSize(new java.awt.Dimension(434, 136));
@@ -465,20 +465,20 @@ public class FrmMain extends javax.swing.JFrame {
                 .addContainerGap())
         );
 
-        javax.swing.GroupLayout jPanel7Layout = new javax.swing.GroupLayout(jPanel7);
-        jPanel7.setLayout(jPanel7Layout);
-        jPanel7Layout.setHorizontalGroup(
-            jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel7Layout.createSequentialGroup()
+        javax.swing.GroupLayout leftPanelLayout = new javax.swing.GroupLayout(leftPanel);
+        leftPanel.setLayout(leftPanelLayout);
+        leftPanelLayout.setHorizontalGroup(
+            leftPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(leftPanelLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(leftPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jPanel6, javax.swing.GroupLayout.DEFAULT_SIZE, 369, Short.MAX_VALUE)
                     .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, 369, Short.MAX_VALUE))
                 .addContainerGap())
         );
-        jPanel7Layout.setVerticalGroup(
-            jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel7Layout.createSequentialGroup()
+        leftPanelLayout.setVerticalGroup(
+            leftPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, leftPanelLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(jPanel6, javax.swing.GroupLayout.DEFAULT_SIZE, 133, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -486,26 +486,26 @@ public class FrmMain extends javax.swing.JFrame {
                 .addContainerGap())
         );
 
-        jSplitPane1.setLeftComponent(jPanel7);
+        splitPaneMain.setLeftComponent(leftPanel);
 
-        javax.swing.GroupLayout jPanel8Layout = new javax.swing.GroupLayout(jPanel8);
-        jPanel8.setLayout(jPanel8Layout);
-        jPanel8Layout.setHorizontalGroup(
-            jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel8Layout.createSequentialGroup()
+        javax.swing.GroupLayout rightPanelLayout = new javax.swing.GroupLayout(rightPanel);
+        rightPanel.setLayout(rightPanelLayout);
+        rightPanelLayout.setHorizontalGroup(
+            rightPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(rightPanelLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(tabResult, javax.swing.GroupLayout.DEFAULT_SIZE, 301, Short.MAX_VALUE)
                 .addContainerGap())
         );
-        jPanel8Layout.setVerticalGroup(
-            jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel8Layout.createSequentialGroup()
+        rightPanelLayout.setVerticalGroup(
+            rightPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(rightPanelLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(tabResult, javax.swing.GroupLayout.DEFAULT_SIZE, 346, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
-        jSplitPane1.setRightComponent(jPanel8);
+        splitPaneMain.setRightComponent(rightPanel);
 
         btnQrcode.setText("QrCode");
         btnQrcode.setToolTipText("");
@@ -545,7 +545,7 @@ public class FrmMain extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jPanel3, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jSplitPane1, javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(splitPaneMain, javax.swing.GroupLayout.Alignment.TRAILING)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addComponent(btnMute)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -574,7 +574,7 @@ public class FrmMain extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jSplitPane1)
+                .addComponent(splitPaneMain)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
@@ -669,14 +669,14 @@ public class FrmMain extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel6;
-    private javax.swing.JPanel jPanel7;
-    private javax.swing.JPanel jPanel8;
-    private javax.swing.JSplitPane jSplitPane1;
     private javax.swing.JLabel labelRefresh;
     public javax.swing.JLabel last_sent;
+    public javax.swing.JPanel leftPanel;
     public javax.swing.JLabel main_title;
     private javax.swing.JMenuItem menuItemLogout;
     public javax.swing.JLabel refreshRateLabel;
+    private javax.swing.JPanel rightPanel;
+    public javax.swing.JSplitPane splitPaneMain;
     public javax.swing.JTabbedPane tabResult;
     public javax.swing.JLabel weightUnit;
     public javax.swing.JLabel weightValue;

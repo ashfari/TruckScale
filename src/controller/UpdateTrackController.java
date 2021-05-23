@@ -113,11 +113,14 @@ public class UpdateTrackController {
         this.cancelProcess.setEnabled(false);
         params.put("qrcode", qrcode);
         try {
-            params.put("wb_id", frmMain.config.getString("kodeTimbangan"));
+            if (this.frmMain.config.getString("isActiveWeighBridge").equals("true")) {
+                params.put("wb_id", frmMain.config.getString("kodeTimbangan"));
+                data.put(Double.parseDouble(frmMain.weightValue.getText()));
+                data.put(frmMain.weightUnit.getText().toLowerCase());
+                params.put("data", data);
+            }
+            
             params.put("track_name", this.trackName);
-            data.put(Double.parseDouble(frmMain.weightValue.getText()));
-            data.put(frmMain.weightUnit.getText().toLowerCase());
-            params.put("data", data);
         } catch (JSONException ex) {
             Logger.getLogger(UpdateTrackController.class.getName()).log(Level.SEVERE, null, ex);
         }

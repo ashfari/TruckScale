@@ -75,9 +75,10 @@ public class LogManager {
     public String updateLog(String log) {
         Date date = new Date();
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-        log = formatter.format(date) + " " + log;
+        SimpleDateFormat formatterLog = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        log = "(" + formatterLog.format(date) + ") " + log;
         
-        try {
+        try { 
             log = getLog() + log;
         } catch (FileNotFoundException ex) {
             Logger.getLogger(LogManager.class.getName()).log(Level.SEVERE, null, ex);

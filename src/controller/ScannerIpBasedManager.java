@@ -53,7 +53,7 @@ public class ScannerIpBasedManager {
     String ip = "";
     int port = 0;
     int indexScanner = 0, indexScannerShow = 0; 
-    String scannerInput = "", prevScannerInput = "", scannerBuffer = "";
+    String scannerInput = "", prevScannerInput = "", currentScannerInput = "", scannerBuffer = "";
     byte[] buff = new byte[1024];
     int ret_read = 0;
     InputStream instr = null;
@@ -92,6 +92,7 @@ public class ScannerIpBasedManager {
         this.indexScanner = indexScanner;
         this.indexScannerShow = indexScannerShow;
         this.notifPath = "./notification.mp3";
+        this.timer = new Timer();
         
         new ScannerTask().execute();
     }
@@ -165,17 +166,34 @@ public class ScannerIpBasedManager {
                 public void run() {
                     panel.revalidate();
                     isConnected(pair.connect);
-//                    delay
-                        if (!pair.scannerInput.equals("")) {
-                            if (!scannerInput.equals(prevScannerInput)) {
-                                prevScannerInput = scannerInput;
+                    storeInputValidate(pair);
+                }
+            });
+        }
+        
+        private void storeInputValidate(ScannerPair pair) {
+            if (!pair.scannerInput.equals("")) {
+                currentScannerInput = pair.scannerInput;
+            }
+
+            timer.scheduleAtFixedRate(new TimerTask() {
+                @Override
+                public void run() {
+                    if (!currentScannerInput.equals("")) {
+                        if (currentScannerInput.equals(prevScannerInput)) {
+                            result.setForeground(Color.BLACK);
+                            result.setText("Scanning...");
+                            delay--;
+                            if (delay < 0) {
                                 storeInput();
                             }
                         } else {
-                            prevScannerInput = "";
+                            resetTimer();
+                            prevScannerInput = currentScannerInput;
                         }
+                    } 
                 }
-            });
+            }, 0, 1000);
         }
         
         private void tryingToConnect() {
@@ -209,9 +227,9 @@ public class ScannerIpBasedManager {
         }
     }
     
-    public void resetDelay() {
+    public void resetTimer() {
         try {
-            delay = (int) (Double.parseDouble(frmMain.config.getString("delayScan")) * (1000 / sleepTime));
+            delay = (int) (Double.parseDouble(frmMain.config.getString("delayScan")));
         } catch (JSONException ex) {
             Logger.getLogger(ThreadScanner.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -300,10 +318,15 @@ public class ScannerIpBasedManager {
         result.setLineWrap(true);
         result.setWrapStyleWord(true);
         
+        statusProcess.setFont(new java.awt.Font("Monospaced", 1, 18));
         statusProcess.setHorizontalAlignment(SwingConstants.CENTER);
         
         doneProcess.setEnabled(false);
         cancelProcess.setEnabled(false);
+        
+//        disable title
+        panel.remove(title);
+        panel.remove(separator);
         
         logs.addActionListener(new ActionListener() {
             @Override
@@ -336,11 +359,15 @@ public class ScannerIpBasedManager {
     }
     
     public void storeInput() {
+        resetTimer();
         frmMain.tabNotify(this.indexScannerShow);
         try {
-            scannerParams.put("qrcode", scannerInput.replaceAll("\\r\\n", ""));
+            scannerParams.put("qrcode", currentScannerInput.replaceAll("\\r\\n", ""));
             if (!scannerInput.equals("")) {
-                scannerParams.put("wb_id", frmMain.config.getString("kodeTimbangan"));
+                if (this.frmMain.config.getString("isActiveWeighBridge").equals("true")) {
+                    scannerParams.put("wb_id", frmMain.config.getString("kodeTimbangan"));
+                }
+                
                 scannerParams.put("track_name", frmMain.scanner[indexScanner][5].toString());
                 try {
                     System.out.println("send post request" + scannerInput);
@@ -353,6 +380,7 @@ public class ScannerIpBasedManager {
                             frmMain.authManager.readAuth());
                     showResult(resultRequest);
                     scannerInput = "";
+                    currentScannerInput = "";
                 } catch (Exception ex) {
                     Logger.getLogger(ThreadScanner.class.getName()).log(Level.SEVERE, null, ex);
                 }
@@ -367,6 +395,7 @@ public class ScannerIpBasedManager {
         resultJson = new JSONObject(resultResponse.body().string());
         
         if (resultRequest.isSuccessful()) {
+            result.setForeground(Color.GREEN.darker());
             result.setText("Success: QR Code Valid");
             result.append("\n\n");
             result.append("SO Number: " + resultJson.get("so_number").toString());
