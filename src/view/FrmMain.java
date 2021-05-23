@@ -19,7 +19,6 @@ import controller.ThreadMain;
 import controller.ThreadScannerIpBased;
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.FlowLayout;
 import java.awt.KeyEventDispatcher;
 import java.awt.KeyboardFocusManager;
 import java.awt.Point;
@@ -30,17 +29,10 @@ import java.io.FileNotFoundException;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JScrollPane;
+import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
-import javax.swing.JSeparator;
-import javax.swing.JTextArea;
-import javax.swing.SpringLayout;
-import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
@@ -80,6 +72,7 @@ public class FrmMain extends javax.swing.JFrame {
     int indexScannerShow = 0;
     public boolean isRestart = false;
     public FrmMain frmMain = null;
+    public boolean isMuted = false;
 
     /**
      * Creates new form FrmMain
@@ -99,6 +92,21 @@ public class FrmMain extends javax.swing.JFrame {
     }
     
     public void createObjects() {
+        btnMute.setIcon(new ImageIcon("./icons/sound_unmute.png"));
+        btnScannerSetting.setIcon(new ImageIcon("./icons/scanner.png"));
+        btnQrcode.setIcon(new ImageIcon("./icons/qrcode.png"));
+        btnConfig.setIcon(new ImageIcon("./icons/setting.png"));
+        btnExit.setIcon(new ImageIcon("./icons/exit.png"));
+        btnUser.setIcon(new ImageIcon("./icons/user.png"));
+        menuItemLogout.setIcon(new ImageIcon("./icons/logout.png"));
+        labelRefresh.setIcon(new ImageIcon("./icons/refresh.png"));
+        btnMute.setText("");
+        btnScannerSetting.setText("");
+        btnQrcode.setText("");
+        btnConfig.setText("");
+        btnExit.setText("");
+        labelRefresh.setText("");
+
         createUserPopUp();
         try {
             this.configManager = new ConfigManager();
@@ -176,107 +184,24 @@ public class FrmMain extends javax.swing.JFrame {
     
     public void tabNotify(int indexScannerShow) {
         if (tabResult.getSelectedIndex() != indexScannerShow) {
-            tabResult.setForegroundAt(indexScannerShow, Color.RED);
+            tabResult.setForegroundAt(indexScannerShow, Color.GREEN.darker());
         }
     }
     
     private JPanel createNewPanelResult(int indexScanner, int indexScannerShow) {
         JPanel panel = new JPanel();
-//        JLabel title = new JLabel("QR Code Scan");
-//        JSeparator separator = new JSeparator();
-//        JSeparator separatorBottom = new JSeparator();
-//        JTextArea result = new JTextArea("");
-//        JScrollPane scrollPane = new JScrollPane(result);
-//        JLabel statusProcess = new JLabel("Status Proses");
-//        JPanel buttonGroup = new JPanel();
-//        JButton doneProcess = new JButton("OK");
-//        JButton cancelProcess = new JButton("Cancel");
-//        
-//        SpringLayout layout = new SpringLayout();
-//        panel.setLayout(layout);
-//        
-//        buttonGroup.setLayout(new FlowLayout());
-//        
-//        panel.add(title);
-//        panel.add(separator);
-//        panel.add(scrollPane);
-//        panel.add(separatorBottom);
-//        panel.add(statusProcess);
-//        panel.add(buttonGroup);
-//        
-//        buttonGroup.add(doneProcess);
-//        buttonGroup.add(cancelProcess);
-//        
-//        panel.setBackground(Color.white);
-//        panel.setBorder(new EmptyBorder(10, 10, 10, 10));
-//        
-//        buttonGroup.setBackground(Color.white);
-//        buttonGroup.setBorder(new EmptyBorder(0, 0, 0, 0));
-//        
-//        layout.putConstraint(SpringLayout.NORTH, title, 0, SpringLayout.NORTH, panel);
-//        layout.putConstraint(SpringLayout.WEST, title, 0, SpringLayout.WEST, panel);
-//        layout.putConstraint(SpringLayout.EAST, title, 0, SpringLayout.EAST, panel);
-//        layout.putConstraint(SpringLayout.NORTH, separator, 11, SpringLayout.SOUTH, title);
-//        layout.putConstraint(SpringLayout.WEST, separator, 0, SpringLayout.WEST, panel);
-//        layout.putConstraint(SpringLayout.EAST, separator, 0, SpringLayout.EAST, panel);
-//        layout.putConstraint(SpringLayout.NORTH, result, 0, SpringLayout.NORTH, scrollPane);
-//        layout.putConstraint(SpringLayout.EAST, result, 0, SpringLayout.EAST, scrollPane);
-//        layout.putConstraint(SpringLayout.WEST, result, 0, SpringLayout.WEST, scrollPane);
-//        layout.putConstraint(SpringLayout.SOUTH, result, 0, SpringLayout.SOUTH, scrollPane);
-//        layout.putConstraint(SpringLayout.NORTH, scrollPane, 0, SpringLayout.SOUTH, separator);
-//        layout.putConstraint(SpringLayout.WEST, scrollPane, 0, SpringLayout.WEST, panel);
-//        layout.putConstraint(SpringLayout.EAST, scrollPane, 0, SpringLayout.EAST, panel);
-//        layout.putConstraint(SpringLayout.SOUTH, scrollPane, 0, SpringLayout.NORTH, separatorBottom);
-//        layout.putConstraint(SpringLayout.WEST, separatorBottom, 0, SpringLayout.WEST, panel);
-//        layout.putConstraint(SpringLayout.EAST, separatorBottom, 0, SpringLayout.EAST, panel);
-//        layout.putConstraint(SpringLayout.SOUTH, separatorBottom, 0, SpringLayout.NORTH, statusProcess);
-//        layout.putConstraint(SpringLayout.WEST, statusProcess, 0, SpringLayout.WEST, panel);
-//        layout.putConstraint(SpringLayout.EAST, statusProcess, 0, SpringLayout.EAST, panel);
-//        layout.putConstraint(SpringLayout.SOUTH, statusProcess, 0, SpringLayout.NORTH, buttonGroup);
-//        layout.putConstraint(SpringLayout.WEST, buttonGroup, 0, SpringLayout.WEST, panel);
-//        layout.putConstraint(SpringLayout.EAST, buttonGroup, 0, SpringLayout.EAST, panel);
-//        layout.putConstraint(SpringLayout.SOUTH, buttonGroup, 0, SpringLayout.SOUTH, panel);
-//        
-//        title.setFont(new java.awt.Font("Monospaced", 1, 18));
-//        title.setHorizontalAlignment(SwingConstants.CENTER);
-//        
-//        separator.setOrientation(SwingConstants.HORIZONTAL);
-//        separatorBottom.setOrientation(SwingConstants.HORIZONTAL);
-//        
-//        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-//        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-//        scrollPane.setBorder(new EmptyBorder(10, 0, 0, 0));
-//        scrollPane.setBackground(Color.white);
-//        
-//        result.setEditable(false);
-//        result.setFont(new java.awt.Font("Monospaced", 0, 18)); // NOI18N
-//        result.setLineWrap(true);
-//        result.setWrapStyleWord(true);
-//        
-//        statusProcess.setHorizontalAlignment(SwingConstants.CENTER);
-//        
-//        doneProcess.setEnabled(false);
-//        cancelProcess.setEnabled(false);
+
+        new ScannerIpBasedManager(frmMain, panel, 
+                scanner[indexScanner][3].toString(), 
+                Integer.parseInt(scanner[indexScanner][4].toString()),
+                indexScanner, indexScannerShow
+        );
         
-//        Create result thread
-//        if (this.scanner[indexScanner][2].toString().equals("IP Based")) {
-//            this.threadScannerIpBased = new ThreadScannerIpBased(this, 
-//                title, result, statusProcess, doneProcess, cancelProcess, indexScanner, indexScannerShow);
-//            this.threadScannerIpBased.start();
-//        } else {
-//            this.threadScanner = new ThreadScanner(this, title, result, indexScanner, indexScannerShow);
-//            this.threadScanner.start();
-//        }
-//        
-        SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                new ScannerIpBasedManager(frmMain, panel, 
-                        scanner[indexScanner][3].toString(), 
-                        Integer.parseInt(scanner[indexScanner][4].toString()),
-                        indexScanner, indexScannerShow
-                );
-            }
-        });
+//        SwingUtilities.invokeLater(new Runnable() {
+//            public void run() {
+//                
+//            }
+//        });
         
         return panel;
     }
@@ -338,10 +263,10 @@ public class FrmMain extends javax.swing.JFrame {
         }
         if (isDebugging.equals("true")) {
             logger.setLevel(Level.INFO);
-            btn_qrcode.setVisible(true);
+            btnQrcode.setVisible(true);
         } else {
             logger.setLevel(Level.OFF);
-            btn_qrcode.setVisible(false);
+            btnQrcode.setVisible(false);
         }
     }
     
@@ -367,13 +292,13 @@ public class FrmMain extends javax.swing.JFrame {
         menuItemLogout = new javax.swing.JMenuItem();
         jPanel1 = new javax.swing.JPanel();
         main_title = new javax.swing.JLabel();
-        jButton1 = new javax.swing.JButton();
+        btnConfig = new javax.swing.JButton();
         jPanel3 = new javax.swing.JPanel();
         date_time_counter = new javax.swing.JLabel();
         dotLabel = new javax.swing.JLabel();
         refreshRateLabel = new javax.swing.JLabel();
-        jLabel4 = new javax.swing.JLabel();
-        exit = new javax.swing.JButton();
+        labelRefresh = new javax.swing.JLabel();
+        btnExit = new javax.swing.JButton();
         jSplitPane1 = new javax.swing.JSplitPane();
         jPanel7 = new javax.swing.JPanel();
         jPanel6 = new javax.swing.JPanel();
@@ -385,9 +310,10 @@ public class FrmMain extends javax.swing.JFrame {
         jPanel8 = new javax.swing.JPanel();
         UIManager.put("TabbedPane.selectedForeground", Color.black);
         tabResult = new javax.swing.JTabbedPane();
-        btn_qrcode = new javax.swing.JButton();
+        btnQrcode = new javax.swing.JButton();
         btnUser = new javax.swing.JButton();
-        jButton2 = new javax.swing.JButton();
+        btnScannerSetting = new javax.swing.JButton();
+        btnMute = new javax.swing.JButton();
 
         menuItemLogout.setText("jMenuItem1");
         menuItemLogout.addActionListener(new java.awt.event.ActionListener() {
@@ -423,11 +349,11 @@ public class FrmMain extends javax.swing.JFrame {
                 .addContainerGap())
         );
 
-        jButton1.setText("Config");
-        jButton1.setToolTipText("");
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
+        btnConfig.setText("Config");
+        btnConfig.setToolTipText("");
+        btnConfig.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
+                btnConfigActionPerformed(evt);
             }
         });
 
@@ -437,9 +363,9 @@ public class FrmMain extends javax.swing.JFrame {
 
         refreshRateLabel.setText("1s");
 
-        jLabel4.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel4.setText("Refresh");
-        jLabel4.setAlignmentY(0.0F);
+        labelRefresh.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        labelRefresh.setText("Refresh");
+        labelRefresh.setAlignmentY(0.0F);
 
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
@@ -449,7 +375,7 @@ public class FrmMain extends javax.swing.JFrame {
                 .addContainerGap()
                 .addComponent(date_time_counter, javax.swing.GroupLayout.PREFERRED_SIZE, 372, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(jLabel4)
+                .addComponent(labelRefresh)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(refreshRateLabel)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
@@ -459,16 +385,16 @@ public class FrmMain extends javax.swing.JFrame {
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(dotLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(labelRefresh, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addComponent(refreshRateLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 36, Short.MAX_VALUE)
             .addComponent(date_time_counter, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
 
-        exit.setText("Exit");
-        exit.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
-        exit.addActionListener(new java.awt.event.ActionListener() {
+        btnExit.setText("Exit");
+        btnExit.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
+        btnExit.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                exitActionPerformed(evt);
+                btnExitActionPerformed(evt);
             }
         });
 
@@ -581,11 +507,11 @@ public class FrmMain extends javax.swing.JFrame {
 
         jSplitPane1.setRightComponent(jPanel8);
 
-        btn_qrcode.setText("QrCode");
-        btn_qrcode.setToolTipText("");
-        btn_qrcode.addActionListener(new java.awt.event.ActionListener() {
+        btnQrcode.setText("QrCode");
+        btnQrcode.setToolTipText("");
+        btnQrcode.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btn_qrcodeActionPerformed(evt);
+                btnQrcodeActionPerformed(evt);
             }
         });
 
@@ -596,10 +522,17 @@ public class FrmMain extends javax.swing.JFrame {
             }
         });
 
-        jButton2.setText("Scanner Settings");
-        jButton2.addActionListener(new java.awt.event.ActionListener() {
+        btnScannerSetting.setText("Scanner Settings");
+        btnScannerSetting.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton2ActionPerformed(evt);
+                btnScannerSettingActionPerformed(evt);
+            }
+        });
+
+        btnMute.setText("Mute");
+        btnMute.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnMuteActionPerformed(evt);
             }
         });
 
@@ -614,14 +547,15 @@ public class FrmMain extends javax.swing.JFrame {
                     .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jSplitPane1, javax.swing.GroupLayout.Alignment.TRAILING)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
-                        .addComponent(jButton2)
+                        .addComponent(btnMute)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(btnScannerSetting)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btn_qrcode)
+                        .addComponent(btnQrcode)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jButton1)
+                        .addComponent(btnConfig)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(exit)
+                        .addComponent(btnExit)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(btnUser)))
                 .addContainerGap())
@@ -631,11 +565,12 @@ public class FrmMain extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jButton1)
-                    .addComponent(exit)
-                    .addComponent(btn_qrcode)
+                    .addComponent(btnConfig)
+                    .addComponent(btnExit)
+                    .addComponent(btnQrcode)
                     .addComponent(btnUser)
-                    .addComponent(jButton2))
+                    .addComponent(btnScannerSetting)
+                    .addComponent(btnMute))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -648,19 +583,19 @@ public class FrmMain extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+    private void btnConfigActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnConfigActionPerformed
         new FrmPassword().setVisible(true);
-    }//GEN-LAST:event_jButton1ActionPerformed
+    }//GEN-LAST:event_btnConfigActionPerformed
 
-    private void exitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exitActionPerformed
+    private void btnExitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnExitActionPerformed
         // TODO add your handling code here:
         System.exit(0);
-    }//GEN-LAST:event_exitActionPerformed
+    }//GEN-LAST:event_btnExitActionPerformed
 
-    private void btn_qrcodeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_qrcodeActionPerformed
+    private void btnQrcodeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnQrcodeActionPerformed
         // TODO add your handling code here:
         new FrmQrCode(this).setVisible(true);
-    }//GEN-LAST:event_btn_qrcodeActionPerformed
+    }//GEN-LAST:event_btnQrcodeActionPerformed
 
     private void btnUserActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUserActionPerformed
         showPopup(evt);
@@ -670,9 +605,18 @@ public class FrmMain extends javax.swing.JFrame {
         this.logout();
     }//GEN-LAST:event_menuItemLogoutActionPerformed
 
-    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+    private void btnScannerSettingActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnScannerSettingActionPerformed
         new FrmListScanner(this).setVisible(true);
-    }//GEN-LAST:event_jButton2ActionPerformed
+    }//GEN-LAST:event_btnScannerSettingActionPerformed
+
+    private void btnMuteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnMuteActionPerformed
+        isMuted = !isMuted;
+        if (isMuted) {
+            btnMute.setIcon(new ImageIcon("./icons/sound_mute.png"));
+        } else {
+            btnMute.setIcon(new ImageIcon("./icons/sound_unmute.png"));
+        }
+    }//GEN-LAST:event_btnMuteActionPerformed
 
     /**
      * @param args the command line arguments
@@ -712,15 +656,15 @@ public class FrmMain extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnConfig;
+    private javax.swing.JButton btnExit;
+    private javax.swing.JButton btnMute;
+    private javax.swing.JButton btnQrcode;
+    private javax.swing.JButton btnScannerSetting;
     private javax.swing.JButton btnUser;
-    private javax.swing.JButton btn_qrcode;
     public javax.swing.JLabel date_time_counter;
     public javax.swing.JLabel dotLabel;
-    private javax.swing.JButton exit;
-    private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButton2;
     private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel4;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
@@ -728,11 +672,12 @@ public class FrmMain extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel7;
     private javax.swing.JPanel jPanel8;
     private javax.swing.JSplitPane jSplitPane1;
+    private javax.swing.JLabel labelRefresh;
     public javax.swing.JLabel last_sent;
     public javax.swing.JLabel main_title;
     private javax.swing.JMenuItem menuItemLogout;
     public javax.swing.JLabel refreshRateLabel;
-    private javax.swing.JTabbedPane tabResult;
+    public javax.swing.JTabbedPane tabResult;
     public javax.swing.JLabel weightUnit;
     public javax.swing.JLabel weightValue;
     // End of variables declaration//GEN-END:variables

@@ -51,75 +51,78 @@ public class ThreadWeight extends Thread {
         isRunning = true;
         try {
             while (isRunning) {
-//                Show Date
-                date = new Date();
-                frmMain.date_time_counter.setText(formatter.format(date));
-                
-//                Set UI based Config
-                try {
-                    refreshRateConfig = Integer.parseInt((String) frmMain.config.get("refreshRate"));
-                } catch (JSONException ex) {
-                    Logger.getLogger(FrmMain.class.getName()).log(Level.SEVERE, null, ex);
-                }
+                if (frmMain.config.getString("isActiveWeighBridge").equals("true")) {
+    //                Show Date
+                    date = new Date();
+                    frmMain.date_time_counter.setText(formatter.format(date));
 
-//                Get Data from WeighBridge
-                refreshRate++;
-                if (refreshRate >= refreshRateConfig) {
-                    frmMain.dotLabel.setEnabled(true);
-                    
+    //                Set UI based Config
                     try {
-                        serialPortManager.getWeight();
-                    } catch (Exception e) {
-                    }
-
-                    if (frmMain.isDebugging.equals("true")) {
-                        System.out.println("current weight : " + frmMain.currentWeight.toString());
-                    }
-                    
-                    try {
-                        if (((Double.parseDouble(frmMain.currentWeight.get("value").toString())
-                                - Double.parseDouble(frmMain.weightValue.getText().toString())) 
-                                > Double.parseDouble(frmMain.config.get("minStepWeight").toString()))
-                                ||
-                                ((Double.parseDouble(frmMain.weightValue.getText().toString())
-                                - Double.parseDouble(frmMain.currentWeight.get("value").toString())) 
-                                > Double.parseDouble(frmMain.config.get("minStepWeight").toString()))) {
-                            
-                            params.put("weigh_bridge_id", frmMain.config.get("kodeTimbangan"));
-                            params.put("value_in_kg", Double.parseDouble(frmMain.weightValue.getText()));
-                            apiResponse = frmMain.okHttpManager.sendPost(frmMain.config.get("apiTimbangan").toString(), params, null);
-                            frmMain.last_sent.setText("Last sent : "
-                                    + frmMain.currentWeight.get("value").toString()
-                                    + " "
-                                    + capitalize(frmMain.currentWeight.get("unit").toString())
-                                    + " ~ "
-                                    + formatter.format(date));
-                            if (frmMain.isDebugging.equals("true")) {
-                                System.out.println("send to : " + frmMain.config.get("apiTimbangan").toString());
-                                System.out.println("params : " + params);
-                                System.out.println("api response : " + apiResponse.body().string());
-                            }
-                        }
-                        if (Integer.parseInt(frmMain.currentWeight.get("value").toString()) == 0) {
-                            frmMain.weightValue.setText("0");
-                        } else {
-                            frmMain.weightValue.setText(frmMain.currentWeight.get("value").toString());
-                        }
-                        frmMain.weightUnit.setText(capitalize(frmMain.currentWeight.get("unit").toString()));
+                        refreshRateConfig = Integer.parseInt((String) frmMain.config.get("refreshRate"));
                     } catch (JSONException ex) {
-//                        Logger.getLogger(ThreadWeight.class.getName()).log(Level.SEVERE, null, ex);
-                    } catch (Exception ex) {
-                        Logger.getLogger(ThreadWeight.class.getName()).log(Level.SEVERE, null, ex);
+                        Logger.getLogger(FrmMain.class.getName()).log(Level.SEVERE, null, ex);
                     }
-                    refreshRate = 0;
+
+    //                Get Data from WeighBridge
+                    refreshRate++;
+                    if (refreshRate >= refreshRateConfig) {
+                        frmMain.dotLabel.setEnabled(true);
+
+                        try {
+                            serialPortManager.getWeight();
+                        } catch (Exception e) {
+                        }
+
+                        if (frmMain.isDebugging.equals("true")) {
+                            System.out.println("current weight : " + frmMain.currentWeight.toString());
+                        }
+
+                        try {
+                            if (((Double.parseDouble(frmMain.currentWeight.get("value").toString())
+                                    - Double.parseDouble(frmMain.weightValue.getText().toString())) 
+                                    > Double.parseDouble(frmMain.config.get("minStepWeight").toString()))
+                                    ||
+                                    ((Double.parseDouble(frmMain.weightValue.getText().toString())
+                                    - Double.parseDouble(frmMain.currentWeight.get("value").toString())) 
+                                    > Double.parseDouble(frmMain.config.get("minStepWeight").toString()))) {
+
+                                params.put("weigh_bridge_id", frmMain.config.get("kodeTimbangan"));
+                                params.put("value_in_kg", Double.parseDouble(frmMain.weightValue.getText()));
+                                apiResponse = frmMain.okHttpManager.sendPost(frmMain.config.get("apiTimbangan").toString(), params, null);
+                                frmMain.last_sent.setText("Last sent : "
+                                        + frmMain.currentWeight.get("value").toString()
+                                        + " "
+                                        + capitalize(frmMain.currentWeight.get("unit").toString())
+                                        + " ~ "
+                                        + formatter.format(date));
+                                if (frmMain.isDebugging.equals("true")) {
+                                    System.out.println("send to : " + frmMain.config.get("apiTimbangan").toString());
+                                    System.out.println("params : " + params);
+                                    System.out.println("api response : " + apiResponse.body().string());
+                                }
+                            }
+                            if (Integer.parseInt(frmMain.currentWeight.get("value").toString()) == 0) {
+                                frmMain.weightValue.setText("0");
+                            } else {
+                                frmMain.weightValue.setText(frmMain.currentWeight.get("value").toString());
+                            }
+                            frmMain.weightUnit.setText(capitalize(frmMain.currentWeight.get("unit").toString()));
+                        } catch (JSONException ex) {
+    //                        Logger.getLogger(ThreadWeight.class.getName()).log(Level.SEVERE, null, ex);
+                        } catch (Exception ex) {
+                            Logger.getLogger(ThreadWeight.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+                        refreshRate = 0;
+                    }
                 }
+
                 // Let the thread sleep for a while.
                 Thread.sleep(1000);
             }
-        }catch (InterruptedException e) {
+        } catch (InterruptedException e) {
+        } catch (JSONException ex) {
+            Logger.getLogger(ThreadWeight.class.getName()).log(Level.SEVERE, null, ex);
         }
-//            Logger.getLogger(ThreadWeight.class.getName()).log(Level.SEVERE, null, ex);
-        
     }
 
     public void start() {

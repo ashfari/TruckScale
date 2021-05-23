@@ -63,6 +63,7 @@ public class ConfigManager {
         config.put("clientSecret", "");
         config.put("apiRequestToken", "http://localhost:8000/oauth/token");
         config.put("apiAccountInfo", "http://localhost:8000/api/customer/v1");
+        config.put("isActiveWeighBridge", "true");
         
 //        Write file
         try (FileWriter file = new FileWriter("./config")) {
